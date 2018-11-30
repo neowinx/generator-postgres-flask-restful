@@ -1,0 +1,9 @@
+{
+  "generator-node": {
+    "promptValues": {
+      "authorName": "Pedro Flores",
+      "authorEmail": "pflores@codelab.com.py",
+      "authorUrl": "http://codelab.com.py"
+    }
+  }
+}
