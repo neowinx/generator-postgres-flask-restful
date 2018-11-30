@@ -1,7 +1,7 @@
 {
-  "name": "generator-flask-restful",
+  "name": "generator-postgres-flask-restful",
   "version": "0.0.0",
-  "description": "Generador de aplicaiones con Flask y Flask-Restful con JWT",
+  "description": "Generador de aplicaciones con Flask y Flask-Restful con JWT",
   "homepage": "",
   "author": {
     "name": "Pedro Flores",
@@ -33,8 +33,10 @@
     "npm": ">= 4.0.0"
   },
   "dependencies": {
-    "yeoman-generator": "^2.0.1",
     "chalk": "^2.1.0",
+    "change-case": "^3.0.2",
+    "massive": "^5.6.0",
+    "yeoman-generator": "^2.0.1",
     "yosay": "^2.0.1"
   },
   "jest": {
@@ -77,6 +79,6 @@
     "precommit": "lint-staged",
     "test": "jest"
   },
-  "repository": "neowinx/generator-flask-restful",
+  "repository": "neowinx/generator-postgres-flask-restful",
   "license": "Apache-2.0"
 }

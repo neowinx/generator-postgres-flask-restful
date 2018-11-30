@@ -1,0 +1,15 @@
+Ejemplo de recurso protegido con JWT
+---
+tags:
+- "resources"
+responses:
+  200:
+    description: El request es exitoso
+  422:
+    description: El access_token no es válido. (Not enough segments, invalid utf-8 chars, etc.)
+parameters:
+  - in: "header"
+    name: "Authorization"
+    description: "Access token"
+    required: true
+    default: Bearer [access_token]

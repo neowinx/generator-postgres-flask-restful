@@ -1,0 +1,28 @@
+Inicia sesión. Genera un JWT como access_token a la app
+---
+tags:
+- "jwt"
+responses:
+  200:
+    description: Se inicia sesión correctamente
+  401:
+    description: Las credenciales proveídas en los datos de login son inválidos
+  400:
+    description: No se puede parsear correctamente el json con los datos de login
+parameters:
+  - in: "body"
+    name: "body"
+    description: "Datos de login"
+    required: true
+    schema:
+      $ref: "#/definitions/LoginData"
+definitions:
+  LoginData:
+    type: "object"
+    properties:
+      username:
+        type: "string"
+        example: "test"
+      password:
+        type: "string"
+        example: "test"

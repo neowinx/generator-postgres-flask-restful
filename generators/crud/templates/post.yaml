@@ -1,0 +1,43 @@
+Guarda un <%=titleCase%>
+---
+tags:
+- "<%=paramCase%>"
+responses:
+  200:
+    description: Se guarda <%=titleCase%>
+  401:
+    description: Las credenciales proveídas en los datos de login son inválidos
+  422:
+    description: El access_token no es válido. (Not enough segments, invalid utf-8 chars, etc.)
+<%_ if(columns.length > 0) { -%>
+parameters:
+  - in: header
+    name: Authorization
+    description: Access token
+    required: true
+    default: Bearer [access_token]
+  - name: body
+    in: body
+    schema:
+      $ref: "#/definitions/<%=pascalCase%>"
+definitions:
+    <%=pascalCase%>:
+        type: "object"
+        properties:
+        <%_ columns.forEach(col => { -%>
+            <%=col.columnName%>:
+                type: "<%=col.swaggerType%>"
+        <%_ }); -%>
+        example:
+        <%_ columns.forEach(col => { -%>
+          <%_ if(col.swaggerType === 'string') { -%>
+            <%=col.columnName%>: <%= 'Lorem ipsum dolor sit amet'.substring(0, col.stringTypeLength ? parseInt(col.stringTypeLength) - 1 : 24) %>
+          <%_ } else if(col.swaggerType === 'date') { -%>
+            <%=col.columnName%>: '2019-01-01'
+          <%_ } else if(col.swaggerType === 'datetime') { -%>
+            <%=col.columnName%>: '2019-01-01T00:00:00'
+          <%_ } else if(col.swaggerType.startsWith('int')) { -%>
+            <%=col.columnName%>: <%=Math.floor((Math.random() * 50) + 1);%>
+          <%_ } -%>
+        <%_ }); -%>
+<%_ } -%>

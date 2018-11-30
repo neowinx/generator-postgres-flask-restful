@@ -1,0 +1,15 @@
+Finaliza la sesión. Agrega el token a la lista de tokens invalidados (blacklist)
+---
+tags:
+- "jwt"
+responses:
+  200:
+    description: Se finaliza la sessión exitósamente
+  422:
+    description: El access_token no es válido. (Not enough segments, invalid utf-8 chars, etc.)
+parameters:
+  - in: "header"
+    name: "Authorization"
+    description: "Access token"
+    required: true
+    default: Bearer [access_token]

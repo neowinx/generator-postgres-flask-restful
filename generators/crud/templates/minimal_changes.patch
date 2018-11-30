@@ -1,0 +1,51 @@
+diff --git a/app.py b/app.py
+index 7e27d90..33dca25 100644
+--- a/app.py
++++ b/app.py
+@@ -5,10 +5,12 @@ from flask_jwt_extended import (
+     JWTManager, jwt_required, create_access_token,
+     get_jwt_identity
+ )
++from flask_restful import Api, Resource
+ 
+ 
+ app = Flask(__name__)
+ CORS(app, supports_credentials=True)
++api = Api(app)
+ 
+ # Swagger config
+ app.config['SWAGGER'] = {
+@@ -63,6 +65,15 @@ def protected():
+     current_user = get_jwt_identity()
+     return jsonify(logged_in_as=current_user), 200
+ 
++class Cliente(Resource):
++    @jwt_required
++    @swag_from('swagger/cliente/get_cliente.yaml')
++    def get(self, descripcion):
++        return {'descripcion': descripcion}, 200
++
++
++api.add_resource(Cliente, '/username/<descripcion>')
++
+ 
+ if __name__ == '__main__':
+     app.run()
+diff --git a/swagger/cliente/get_cliente.yaml b/swagger/cliente/get_cliente.yaml
+new file mode 100644
+index 0000000..e51a2d1
+--- /dev/null
++++ b/swagger/cliente/get_cliente.yaml
+@@ -0,0 +1,12 @@
++Obtiene un cliente
++---
++tags:
++- "cliente"
++responses:
++  200:
++    description: Se obtiene un cliente
++parameters:
++  - name: descripcion
++    in: path
++    default: moloko
++    required: true

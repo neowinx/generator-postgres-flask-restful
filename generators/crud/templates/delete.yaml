@@ -1,0 +1,23 @@
+Borra un <%=titleCase%>
+---
+tags:
+- "<%=paramCase%>"
+responses:
+  200:
+    description: Se borra <%=titleCase%>
+  401:
+    description: Las credenciales proveídas en los datos de login son inválidos
+  422:
+    description: El access_token no es válido. (Not enough segments, invalid utf-8 chars, etc.)
+<%_ if(columns.length > 0) { 
+    firstColumnName = columns[0].columnName -%>
+parameters:
+  - in: header
+    name: Authorization
+    description: Access token
+    required: true
+    default: Bearer [access_token]
+  - name: <%=firstColumnName%>
+    in: path
+    required: true
+<%_ } -%>
