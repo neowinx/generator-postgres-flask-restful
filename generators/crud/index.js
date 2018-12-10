@@ -58,8 +58,8 @@ module.exports = class extends Generator {
         default: 'public'
       }
     ];
-    
-	  questions = promptSuggestion.prefillQuestions(this._globalConfig, questions);
+
+    questions = promptSuggestion.prefillQuestions(this._globalConfig, questions);
     questions = promptSuggestion.prefillQuestions(this.config, questions);
 
     const prompts = new Rx.Subject();
@@ -84,14 +84,21 @@ module.exports = class extends Generator {
         console.log('connecting...');
         if (!massiveInst) {
           let opts = prmp.ui.answers;
-          opts['excludeFunctions'] = true;	
+          opts.excludeFunctions = true;
           massiveInst = massive(opts, { allowedSchemas: prmp.ui.answers.schema });
         }
         massiveInst
           .then(db => {
             this.log('connected.', db);
             this.db = db;
-            let tablas = prmp.ui.answers.schema === 'public' ? db.listTables().map(t => 'public.' + t) : db.listTables().filter(t => t.startsWith(prmp.ui.answers.schema));
+            let currentSize = db.listTables().length;
+            var tablas =
+              prmp.ui.answers.schema === db.currentSchema
+                ? db.listTables().map(t => db.currentSchema + t)
+                : db.listTables().filter(t => t.startsWith(prmp.ui.answers.schema));
+            if (tablas.length !== currentSize) {
+              tablas = db.listTables();
+            }
             if (tablas.length > 0) {
               prompts.next({
                 type: 'checkbox',
@@ -155,7 +162,10 @@ module.exports = class extends Generator {
       let pascalCase = changeCase.pascalCase(tableName);
       let titleCase = changeCase.titleCase(tableName);
       let snakeCase = changeCase.snakeCase(tableName);
-      let table = this.props.schema === 'public' ? this.db[tableName] : this.db[this.props.schema][tableName];
+      let table =
+        this.props.schema === this.db.currentSchema
+          ? this.db[tableName]
+          : this.db[this.props.schema][tableName];
       console.log('Instrocpecting column types...');
       this.db
         .query(
@@ -174,13 +184,14 @@ module.exports = class extends Generator {
             WHERE c.relname ~ '^(${tableName})$' AND n.nspname = '${this.props.schema}');`
         )
         .then(colInfo => {
+          if (!colInfo && colInfo.length <= 0) return;
           colInfo.forEach(ci => {
             ci.sqlAlchemyType = pgToSQLAlchemyType(ci.dataType);
             if(ci.sqlAlchemyType && ci.sqlAlchemyType.startsWith('String') && ci.sqlAlchemyType.indexOf('(') > -1) {
               ci.stringTypeLength = ci.sqlAlchemyType.substring(ci.sqlAlchemyType.indexOf('(') + 1, ci.sqlAlchemyType.indexOf(')'));
             }
             ci.swaggerType = pgToSwaggType(ci.dataType);
-            ci.pythonType= pgToPythonType(ci.dataType);
+            ci.pythonType = pgToPythonType(ci.dataType);
           });
           let templateData = {
             schemaName: this.props.schema,
@@ -233,7 +244,7 @@ module.exports = class extends Generator {
           let appendResourceApp = this.fs.read(
             this.templatePath('append_resource_app.py')
           );
-          
+
           if(!this.dbURLChanged) {
             let dbURL = `postgresql://${this.props.user}:${this.props.password}@${this.props.host}:${this.props.port}/${this.props.database}`;
             let dbURLStart = appPy.indexOf('SQLALCHEMY_DATABASE_URI');
