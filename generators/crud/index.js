@@ -91,14 +91,10 @@ module.exports = class extends Generator {
           .then(db => {
             this.log('connected.', db);
             this.db = db;
-            let currentSize = db.listTables().length;
             var tablas =
               prmp.ui.answers.schema === db.currentSchema
-                ? db.listTables().map(t => db.currentSchema + t)
+                ? db.listTables().map(t => db.currentSchema + '.' + t)
                 : db.listTables().filter(t => t.startsWith(prmp.ui.answers.schema));
-            if (tablas.length !== currentSize) {
-              tablas = db.listTables();
-            }
             if (tablas.length > 0) {
               prompts.next({
                 type: 'checkbox',
@@ -126,8 +122,11 @@ module.exports = class extends Generator {
 
     return prmp.then(props => {
       if (!this.options['skip-cache']) {
-        promptSuggestion.storeAnswers(this._globalConfig, questions, props, false);
-        promptSuggestion.storeAnswers(this.config, questions, props, true);
+        let ansprops = Object.assign({}, props);
+        delete ansprops.tables;
+        delete ansprops.enableFunctions;
+        promptSuggestion.storeAnswers(this._globalConfig, questions, ansprops, false);
+        promptSuggestion.storeAnswers(this.config, questions, ansprops, true);
       }
       this.props = props;
     });
