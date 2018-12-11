@@ -139,6 +139,7 @@ module.exports = class extends Generator {
         return pgType.replace('character varying', 'String');
       if (['int', 'integer'].includes(pgType)) return 'Integer';
       if (pgType === 'bigint') return 'BigInteger';
+      if (pgType === 'boolean') return 'Boolean';
       if (pgType === 'date') return 'Date';
       if (pgType.startsWith('timestamp')) return 'DateTime';
     }
@@ -146,6 +147,7 @@ module.exports = class extends Generator {
       if (pgType.startsWith('character varying')) return 'str';
       if (['int', 'integer'].includes(pgType)) return 'int';
       if (pgType === 'bigint') return 'int';
+      if (pgType === 'boolean') return 'bool';
       if (pgType === 'date') return 'date';
       if (pgType.startsWith('timestamp')) return 'datetime';
     }
@@ -153,11 +155,12 @@ module.exports = class extends Generator {
       if (pgType.startsWith('character varying')) return 'string';
       if (['int', 'integer'].includes(pgType)) return 'int';
       if (pgType === 'bigint') return 'int64';
+      if (pgType === 'boolean') return 'boolean';
       if (pgType === 'date') return 'date';
       if (pgType.startsWith('timestamp')) return 'datetime';
     }
     this.props.tables.forEach(tableNameWithSchema => {
-      let tableName = tableNameWithSchema.replace(`${this.props.schema}.`, '')
+      let tableName = tableNameWithSchema.replace(`${this.props.schema}.`, '');
       let paramCase = changeCase.paramCase(tableName);
       let pascalCase = changeCase.pascalCase(tableName);
       let titleCase = changeCase.titleCase(tableName);
@@ -187,8 +190,15 @@ module.exports = class extends Generator {
           if (!colInfo && colInfo.length <= 0) return;
           colInfo.forEach(ci => {
             ci.sqlAlchemyType = pgToSQLAlchemyType(ci.dataType);
-            if(ci.sqlAlchemyType && ci.sqlAlchemyType.startsWith('String') && ci.sqlAlchemyType.indexOf('(') > -1) {
-              ci.stringTypeLength = ci.sqlAlchemyType.substring(ci.sqlAlchemyType.indexOf('(') + 1, ci.sqlAlchemyType.indexOf(')'));
+            if (
+              ci.sqlAlchemyType &&
+              ci.sqlAlchemyType.startsWith('String') &&
+              ci.sqlAlchemyType.indexOf('(') > -1
+            ) {
+              ci.stringTypeLength = ci.sqlAlchemyType.substring(
+                ci.sqlAlchemyType.indexOf('(') + 1,
+                ci.sqlAlchemyType.indexOf(')')
+              );
             }
             ci.swaggerType = pgToSwaggType(ci.dataType);
             ci.pythonType = pgToPythonType(ci.dataType);
