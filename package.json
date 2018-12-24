@@ -1,6 +1,6 @@
 {
   "name": "generator-postgres-flask-restful",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Generador de aplicaciones con Flask y Flask-Restful con JWT",
   "homepage": "",
   "author": {
