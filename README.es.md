@@ -57,10 +57,58 @@ Genera servicios crud con una API REST sobre una tabla de la base de datos (ejec
 yo postgres-flask-restful:crud
 ```
 
-ingrese los datos a las preguntas que el generador le consulte
+Ingrese los datos a las preguntas que el generador le consulte y seleccione las tablas cuyos servicios CRUD desea generar:
 
 ```bash
+     _-----_     ╭──────────────────────────╮
+    |       |    │      Generador crud      │
+    |--(o)--|    │ postgresql-flask-vue-cor │
+   `---------´   │           eui!           │
+    ( _´U`_ )    ╰──────────────────────────╯
+    /___A___\   /
+     |  ~  |     
+   __'.___.'__   
+ ´   `  |° ´ Y ` 
+
+? Ingrese el host *localhost*
+? Ingrese el puerto *5432*
+? Ingrese el nombre de la base de datos *postgres*
+? Ingrese el usuario *postgres*
+? Ingrese el password *postgres*
+? Ingrese el esquema al que quiere conectar *usuario*
+connecting...
+connected.
+? Seleccione las tablas a generar artefactos 
+ ◯ usuario.auditoria
+❯◉ usuario.usuario
+ ◯ usuario.usuario_historial
+(Move up and down to reveal more choices)
+
 ```
+
+Si se le pregunta si quiere sobreescribir archivos seleccione todos (opcion `a`):
+
+```bash
+...
+Instrocpecting column types...
+identical models/usuario.py
+identical resources/usuario.py
+identical swagger/usuario/list_usuario.yaml
+identical swagger/usuario/get_usuario.yaml
+ conflict swagger/usuario/post_usuario.yaml
+? Overwrite swagger/usuario/post_usuario.yaml? overwrite this and all others
+    force swagger/usuario/post_usuario.yaml
+    force swagger/usuario/put_usuario.yaml
+    force swagger/usuario/delete_usuario.yaml
+    force app.py
+...
+```
+
+Reinicie la aplicación flask (usualmente presionando Control+C en la consola y ejecutando de nuevo `python app.py` en la misma)
+
+Los servicios generados deben aparecer en la documentación swagger correspondiente:
+
+![CRUD de usuario](doc/crud_usuario.png "CRUD de usuario")
 
 ## Conociendo a Yeoman
 
