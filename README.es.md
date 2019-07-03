@@ -39,7 +39,7 @@ Debería ver algo similar a esto si es que su proyecto a sido generado sin incon
 
 Ingrese a la dirección http://localhost:5000/ en su navegador para obetener la documentación generada por el swagger:
 
-[!img](doc/swagger.png)
+![Swagger Screen](doc/swagger.png "Swagger Screen")
 
 Por defecto el proyecto genera 3 acciones:
 
