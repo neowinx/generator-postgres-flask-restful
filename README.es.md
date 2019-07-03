@@ -3,14 +3,14 @@
 
 ## Instalación
 
-Primero, instalar [Yeoman](http://yeoman.io) y generator-postgres-flask-restful usando [npm](https://www.npmjs.com/) (asumimos que has instalador previamente [node.js](https://nodejs.org/))
+Primero, instalar [Yeoman](http://yeoman.io) y generator-postgres-flask-restful usando [npm](https://www.npmjs.com/) (asumimos que has instalado previamente [node.js](https://nodejs.org/))
 
 ```bash
 npm install -g yo
 npm install -g generator-postgres-flask-restful
 ```
 
-Entonces, crea un directorio y genera tu proyecto:
+Entonces, cree un directorio y genera tu proyecto:
 
 ```bash
 mkdir super-proyecto
@@ -43,18 +43,23 @@ Ingrese a la dirección http://localhost:5000/ en su navegador para obetener la 
 
 Por defecto el proyecto genera 3 acciones:
 
-  - /login: Inicia sesión. Genera un JWT como access_token a la app
-  - /logout: Finaliza la sesión. Agrega el token a la lista de tokens invalidados (blacklist)
-  - /protected: Ejemplo de recurso protegido con JWT
+  - */login:* Inicia sesión. Genera un JWT como access_token a la app
+  - */logout:* Finaliza la sesión. Agrega el token a la lista de tokens invalidados (blacklist)
+  - */protected:* Ejemplo de recurso protegido con JWT
 
 ## Subgeneradores
 
 ### Crud
 
-Generar servicios crud con una API REST sobre una tabla de la base de datos:
+Genera servicios crud con una API REST sobre una tabla de la base de datos (ejecute el comando en la raiz del proyecto):
 
 ```bash
 yo postgres-flask-restful:crud
+```
+
+ingrese los datos a las preguntas que el generador le consulte
+
+```bash
 ```
 
 ## Conociendo a Yeoman

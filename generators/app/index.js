@@ -6,13 +6,9 @@ const fsnode = require('fs');
 const changeCase = require('change-case');
 
 module.exports = class extends Generator {
-  prompting() {
-    // Have Yeoman greet the user.
-    this.log(yosay(`Bienvenido al generador ${chalk.red('postgres-flask-restful')}!`));
 
-    // Let noSpaces = function(validateMe) {
-    //   return validateMe.indexOf(' ') < 0;
-    // };
+  prompting() {
+    this.log(yosay(`Bienvenido al generador ${chalk.red('postgres-flask-restful')}!`));
 
     const prompts = [
       {
@@ -30,15 +26,14 @@ module.exports = class extends Generator {
   }
 
   writing() {
-    this.fs.copy(this.templatePath('flask/'), this.destinationPath('flask/'), {
+    this.fs.copy(this.templatePath(), this.destinationPath(), {
       globOptions: { dot: true }
     });
     this.fs.copyTpl(
-      this.templatePath('flask/app.py'),
-      this.destinationPath('flask/app.py'),
+      this.templatePath('app.py'),
+      this.destinationPath('app.py'),
       this.props
     );
-    this.fs.copy(this.templatePath('bin/'), this.destinationPath('bin/'));
   }
 
   install() {
@@ -46,16 +41,16 @@ module.exports = class extends Generator {
       return;
     }
 
-    if (!fsnode.existsSync(this.destinationPath('flask/venv/'))) {
+    if (!fsnode.existsSync(this.destinationPath('venv/'))) {
       switch (process.platform) {
         case 'win32':
           this.log('Instalando dependencias...');
-          this.spawnCommand(this.destinationPath('bin/install_dependencies.bat'), []);
+          this.spawnCommand(this.destinationPath('install_dependencies.bat'), []);
           break;
         case 'linux':
           this.log('Instalando dependencias...');
           this.spawnCommand('bash', [
-            this.destinationPath('bin/install_dependencies.sh')
+            this.destinationPath('install_dependencies.sh')
           ]);
           break;
         default:

@@ -13,8 +13,9 @@ module.exports = class extends Generator {
   prompting() {
     this.log(
       yosay(
+          'Generador ' +
         chalk.yellow('crud') +
-          ' generator for ' +
+          ' ' +
           chalk.green('postgresql-flask-vue-coreui') +
           '!'
       )
@@ -214,41 +215,41 @@ module.exports = class extends Generator {
           };
           this.fs.copyTpl(
             this.templatePath('model.py'),
-            this.destinationPath(`flask/models/${snakeCase}.py`),
+            this.destinationPath(`models/${snakeCase}.py`),
             templateData
           );
           this.fs.copyTpl(
             this.templatePath('resource.py'),
-            this.destinationPath(`flask/resources/${snakeCase}.py`),
+            this.destinationPath(`resources/${snakeCase}.py`),
             templateData
           );
           this.fs.copyTpl(
             this.templatePath('list.yaml'),
-            this.destinationPath(`flask/swagger/${snakeCase}/list_${snakeCase}.yaml`),
+            this.destinationPath(`swagger/${snakeCase}/list_${snakeCase}.yaml`),
             templateData
           );
           this.fs.copyTpl(
             this.templatePath('get.yaml'),
-            this.destinationPath(`flask/swagger/${snakeCase}/get_${snakeCase}.yaml`),
+            this.destinationPath(`swagger/${snakeCase}/get_${snakeCase}.yaml`),
             templateData
           );
           this.fs.copyTpl(
             this.templatePath('post.yaml'),
-            this.destinationPath(`flask/swagger/${snakeCase}/post_${snakeCase}.yaml`),
+            this.destinationPath(`swagger/${snakeCase}/post_${snakeCase}.yaml`),
             templateData
           );
           this.fs.copyTpl(
             this.templatePath('put.yaml'),
-            this.destinationPath(`flask/swagger/${snakeCase}/put_${snakeCase}.yaml`),
+            this.destinationPath(`swagger/${snakeCase}/put_${snakeCase}.yaml`),
             templateData
           );
           this.fs.copyTpl(
             this.templatePath('delete.yaml'),
-            this.destinationPath(`flask/swagger/${snakeCase}/delete_${snakeCase}.yaml`),
+            this.destinationPath(`swagger/${snakeCase}/delete_${snakeCase}.yaml`),
             templateData
           );
 
-          var appPy = this.fs.read(this.destinationPath('flask/app.py'));
+          var appPy = this.fs.read(this.destinationPath('app.py'));
           let importsApp = this.fs.read(this.templatePath('imports_app.py'));
           let appendResourceApp = this.fs.read(
             this.templatePath('append_resource_app.py')
@@ -276,7 +277,7 @@ module.exports = class extends Generator {
           let appPyAfter = appPy.substring(mainIfIndex);
 
           this.fs.write(
-            this.destinationPath('flask/app.py'),
+            this.destinationPath('app.py'),
             ejs.render(importsApp + appPyBefore + appendResourceApp + appPyAfter, templateData)
           );
         });
