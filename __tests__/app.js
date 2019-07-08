@@ -7,10 +7,10 @@ describe('generator-flask-restful:app', () => {
   beforeAll(() => {
     return helpers
       .run(path.join(__dirname, '../generators/app'))
-      .withPrompts({ someAnswer: true });
+      .withPrompts({ projectName: 'My Super Project' });
   });
 
   it('creates files', () => {
-    assert.file(['dummyfile.txt']);
+    assert.file(['app.py']);
   });
 });

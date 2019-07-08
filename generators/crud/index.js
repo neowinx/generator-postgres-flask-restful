@@ -13,8 +13,8 @@ module.exports = class extends Generator {
   prompting() {
     this.log(
       yosay(
-          'Generador ' +
-        chalk.yellow('crud') +
+        'Generador ' +
+          chalk.yellow('crud') +
           ' ' +
           chalk.green('postgresql-flask-vue-coreui') +
           '!'
@@ -255,22 +255,24 @@ module.exports = class extends Generator {
             this.templatePath('append_resource_app.py')
           );
 
-          if(!this.dbURLChanged) {
-            let dbURL = `postgresql://${this.props.user}:${this.props.password}@${this.props.host}:${this.props.port}/${this.props.database}`;
+          if (!this.dbURLChanged) {
+            let dbURL =
+              `postgresql://${this.props.user}:${this.props.password}` +
+              `@${this.props.host}:${this.props.port}/${this.props.database}`;
             let dbURLStart = appPy.indexOf('SQLALCHEMY_DATABASE_URI');
-            if(dbURLStart != -1) {
+            if (dbURLStart !== -1) {
               let dbURLEnd = appPy.indexOf(')', dbURLStart);
               let dbURLBefore = appPy.substring(0, dbURLStart);
               let dbURLAfter = appPy.substring(dbURLEnd);
-              appPy = dbURLBefore + `SQLALCHEMY_DATABASE_URI\', \'${dbURL}\'` + dbURLAfter;
+              appPy = dbURLBefore + `SQLALCHEMY_DATABASE_URI', '${dbURL}'` + dbURLAfter;
             }
             this.dbURLChanged = true;
           }
 
-          let mainIfIndex = appPy.indexOf('if __name__ == \'__main__\'');
+          let mainIfIndex = appPy.indexOf(`if __name__ == '__main__'`);
 
-          if(mainIfIndex == -1) {
-            mainIfIndex = appPy.length
+          if (mainIfIndex === -1) {
+            mainIfIndex = appPy.length;
           }
 
           let appPyBefore = appPy.substring(0, mainIfIndex - 1);
@@ -278,7 +280,10 @@ module.exports = class extends Generator {
 
           this.fs.write(
             this.destinationPath('app.py'),
-            ejs.render(importsApp + appPyBefore + appendResourceApp + appPyAfter, templateData)
+            ejs.render(
+              importsApp + appPyBefore + appendResourceApp + appPyAfter,
+              templateData
+            )
           );
         });
     });

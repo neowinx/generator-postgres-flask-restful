@@ -6,7 +6,6 @@ const fsnode = require('fs');
 const changeCase = require('change-case');
 
 module.exports = class extends Generator {
-
   prompting() {
     this.log(yosay(`Bienvenido al generador ${chalk.red('postgres-flask-restful')}!`));
 
@@ -49,9 +48,7 @@ module.exports = class extends Generator {
           break;
         case 'linux':
           this.log('Instalando dependencias...');
-          this.spawnCommand('bash', [
-            this.destinationPath('install_dependencies.sh')
-          ]);
+          this.spawnCommand('bash', [this.destinationPath('install_dependencies.sh')]);
           break;
         default:
           this.log(
