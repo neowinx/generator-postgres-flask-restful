@@ -7,7 +7,7 @@ const Docker = dockerCLI.Docker;
 
 const docker = new Docker();
 
-jest.setTimeout(10000);
+jest.setTimeout(60000);
 
 function sleep(ms) {
   return new Promise(resolve => {
@@ -18,8 +18,8 @@ function sleep(ms) {
 let testPath = path.join(__dirname, 'temp');
 
 // WORK IN PROGRESS
-xdescribe('generator-flask-restful:crud', () => {
-  beforeAll(async () => {
+describe('generator-flask-restful:crud', () => {
+  beforeAll(async done => {
     let schemaPath = path.join(__dirname, 'schema.sql');
     console.log(testPath);
     console.log('stopping ALL postgres running containers...');
@@ -51,8 +51,9 @@ xdescribe('generator-flask-restful:crud', () => {
         user: 'postgres',
         password: 'postgres',
         schema: 'public',
-        tablas: ['user']
-      });
+        tables: ['user']
+      })
+      .on('end', done);
   });
 
   it('creates files', () => {
