@@ -1,5 +1,7 @@
 'use strict';
 const path = require('path');
+const os = require('os');
+const fs = require('fs');
 const assert = require('yeoman-assert');
 const helpers = require('yeoman-test');
 const dockerCLI = require('docker-cli-js');
@@ -7,7 +9,7 @@ const Docker = dockerCLI.Docker;
 
 const docker = new Docker();
 
-jest.setTimeout(15000);
+jest.setTimeout(30000);
 
 function sleep(ms) {
   return new Promise(resolve => {
@@ -15,7 +17,7 @@ function sleep(ms) {
   });
 }
 
-let testPath = path.join(__dirname, 'temp');
+const testPath = fs.mkdtempSync(path.join(os.tmpdir(), 'foo-'));
 
 // WORK IN PROGRESS
 xdescribe('generator-flask-restful:crud', () => {
@@ -51,7 +53,7 @@ xdescribe('generator-flask-restful:crud', () => {
         user: 'postgres',
         password: 'postgres',
         schema: 'public',
-        tables: ['user']
+        tables: ['public.user']
       })
       .on('end', done);
   });
