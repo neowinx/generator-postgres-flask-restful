@@ -7,7 +7,7 @@ const Docker = dockerCLI.Docker;
 
 const docker = new Docker();
 
-jest.setTimeout(60000);
+jest.setTimeout(15000);
 
 function sleep(ms) {
   return new Promise(resolve => {
@@ -18,7 +18,7 @@ function sleep(ms) {
 let testPath = path.join(__dirname, 'temp');
 
 // WORK IN PROGRESS
-describe('generator-flask-restful:crud', () => {
+xdescribe('generator-flask-restful:crud', () => {
   beforeAll(async done => {
     let schemaPath = path.join(__dirname, 'schema.sql');
     console.log(testPath);
