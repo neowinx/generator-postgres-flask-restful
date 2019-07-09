@@ -182,7 +182,8 @@ CREATE TABLE public."user" (
     id bigint DEFAULT nextval('public.user_id_seq'::regclass) NOT NULL,
     "user" character varying(255) NOT NULL,
     password character varying(255) NOT NULL,
-    status character varying(1) NOT NULL
+    status character varying(1) NOT NULL,
+    CONSTRAINT pk_user PRIMARY KEY (id)
 );
 
 
