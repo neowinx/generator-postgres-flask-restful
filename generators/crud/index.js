@@ -249,42 +249,44 @@ module.exports = class extends Generator {
             templateData
           );
 
-          var appPy = this.fs.read(this.destinationPath('app.py'));
-          let importsApp = this.fs.read(this.templatePath('imports_app.py'));
-          let appendResourceApp = this.fs.read(
-            this.templatePath('append_resource_app.py')
-          );
+          if (this.fs.exists(this.destinationPath('app.py'))) {
+            var appPy = this.fs.read(this.destinationPath('app.py'));
+            let importsApp = this.fs.read(this.templatePath('imports_app.py'));
+            let appendResourceApp = this.fs.read(
+              this.templatePath('append_resource_app.py')
+            );
 
-          if (!this.dbURLChanged) {
-            let dbURL =
-              `postgresql://${this.props.user}:${this.props.password}` +
-              `@${this.props.host}:${this.props.port}/${this.props.database}`;
-            let dbURLStart = appPy.indexOf('SQLALCHEMY_DATABASE_URI');
-            if (dbURLStart !== -1) {
-              let dbURLEnd = appPy.indexOf(')', dbURLStart);
-              let dbURLBefore = appPy.substring(0, dbURLStart);
-              let dbURLAfter = appPy.substring(dbURLEnd);
-              appPy = dbURLBefore + `SQLALCHEMY_DATABASE_URI', '${dbURL}'` + dbURLAfter;
+            if (!this.dbURLChanged) {
+              let dbURL =
+                `postgresql://${this.props.user}:${this.props.password}` +
+                `@${this.props.host}:${this.props.port}/${this.props.database}`;
+              let dbURLStart = appPy.indexOf('SQLALCHEMY_DATABASE_URI');
+              if (dbURLStart !== -1) {
+                let dbURLEnd = appPy.indexOf(')', dbURLStart);
+                let dbURLBefore = appPy.substring(0, dbURLStart);
+                let dbURLAfter = appPy.substring(dbURLEnd);
+                appPy = dbURLBefore + `SQLALCHEMY_DATABASE_URI', '${dbURL}'` + dbURLAfter;
+              }
+              this.dbURLChanged = true;
             }
-            this.dbURLChanged = true;
+
+            let mainIfIndex = appPy.indexOf(`if __name__ == '__main__'`);
+
+            if (mainIfIndex === -1) {
+              mainIfIndex = appPy.length;
+            }
+
+            let appPyBefore = appPy.substring(0, mainIfIndex - 1);
+            let appPyAfter = appPy.substring(mainIfIndex);
+
+            this.fs.write(
+              this.destinationPath('app.py'),
+              ejs.render(
+                importsApp + appPyBefore + appendResourceApp + appPyAfter,
+                templateData
+              )
+            );
           }
-
-          let mainIfIndex = appPy.indexOf(`if __name__ == '__main__'`);
-
-          if (mainIfIndex === -1) {
-            mainIfIndex = appPy.length;
-          }
-
-          let appPyBefore = appPy.substring(0, mainIfIndex - 1);
-          let appPyAfter = appPy.substring(mainIfIndex);
-
-          this.fs.write(
-            this.destinationPath('app.py'),
-            ejs.render(
-              importsApp + appPyBefore + appendResourceApp + appPyAfter,
-              templateData
-            )
-          );
         });
     });
   }
