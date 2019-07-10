@@ -18,13 +18,19 @@ function sleep(ms) {
 }
 
 const testPath = fs.mkdtempSync(path.join(os.tmpdir(), 'foo-'));
-
 console.log('testPath: ' + testPath);
 
 // WORK IN PROGRESS
 describe('generator-flask-restful:crud', () => {
   beforeAll(async done => {
+    try {
+      await docker.command('ps');
+    } catch (error) {
+      done.fail('Docker is not running. error:' + error);
+    }
+
     let schemaPath = path.join(__dirname, 'schema.sql');
+
     console.log('stopping ALL postgres running containers...');
     let psdata = await docker.command('ps');
     await psdata.containerList.forEach(async function(container) {
