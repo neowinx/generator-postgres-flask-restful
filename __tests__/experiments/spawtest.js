@@ -3,17 +3,22 @@ const path = require('path');
 const os = require('os');
 const fs = require('fs');
 
-xtest('this is not a test', () => {
-  console.log('yes... keep ignoring me...');
-});
-
 const folder = fs.mkdtempSync(path.join(os.tmpdir(), 'foo-'));
 
 console.log(folder);
 
-const ls = spawn('yo', ['postgres-flask-restful', '--skip-install'], {
-  cwd: folder
-});
+let ls;
+
+if (/^win/.test(process.platform)) {
+  ls = spawn('cmd', ['/s', '/c', 'yo', 'postgres-flask-restful', '--skip-install'], {
+    cwd: folder
+  });
+} else {
+  // Linux
+  ls = spawn('yo', ['postgres-flask-restful', '--skip-install'], {
+    cwd: folder
+  });
+}
 
 var expectedAnswers = 0;
 
