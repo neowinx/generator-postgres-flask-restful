@@ -31,7 +31,7 @@ definitions:
         example:
         <%_ columns.forEach(col => { -%>
           <%_ if(col.swaggerType === 'string') { -%>
-            <%=col.columnName%>: <%= 'Lorem ipsum dolor sit amet'.substring(0, col.stringTypeLength ? parseInt(col.stringTypeLength) - 1 : 24) %>
+            <%=col.columnName%>: <%= 'Lorem ipsum dolor sit amet'.substring(0, col.stringTypeLength ? parseInt(col.stringTypeLength) : 24) %>
           <%_ } else if(col.swaggerType === 'date') { -%>
             <%=col.columnName%>: '2019-01-01'
           <%_ } else if(col.swaggerType === 'datetime') { -%>
