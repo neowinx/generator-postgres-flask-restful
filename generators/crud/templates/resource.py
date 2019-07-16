@@ -56,8 +56,8 @@ class <%=pascalCase%>List(Resource):
     @jwt_required
     @swag_from('../swagger/<%=snakeCase%>/list_<%=snakeCase%>.yaml')
     def get(self):
-        return {'<%=snakeCase%>s': [x.json() for x in <%=pascalCase%>Model.find_all()]}
-    
+        return [x.json() for x in <%=pascalCase%>Model.find_all()]
+
 <%_ if(columns.length > 0) { 
     firstColumnName = columns[0].columnName -%>
     @jwt_required
