@@ -1,54 +1,54 @@
 const { spawn } = require('child_process');
-const path = require('path');
-const os = require('os');
-const fs = require('fs');
 
-const folder = fs.mkdtempSync(path.join(os.tmpdir(), 'foo-'));
-
-console.log(folder);
-
-const ls = spawn('yo', ['postgres-flask-restful:crud'], {
-  cwd: folder
-});
+const ls = spawn('yo', ['postgres-flask-restful:crud']);
 
 var expectedAnswers = 0;
 
 // STDOUT events
 ls.stdout.on('data', data => {
   console.log(`stdout: ${data}`);
-  if (data.indexOf('Ingrese el host (localhost)') > 0) {
+  if (data.indexOf('Ingrese el host') > 0 && expectedAnswers === 0) {
     ls.stdin.write('\n');
     expectedAnswers++;
   }
-  if (data.indexOf('Ingrese el puerto (5432)') > 0) {
+  if (data.indexOf('Ingrese el puerto') > 0 && expectedAnswers === 1) {
     ls.stdin.write('15432\n');
     expectedAnswers++;
   }
-  if (data.indexOf('Ingrese el nombre de la base de datos (postgres)') > 0) {
+  if (data.indexOf('Ingrese el nombre de la base de datos') > 0 && expectedAnswers === 2) {
     ls.stdin.write('db\n');
     expectedAnswers++;
   }
-  if (data.indexOf('Ingrese el usuario (postgres)') > 0) {
+  if (data.indexOf('Ingrese el usuario') > 0 && expectedAnswers === 3) {
     ls.stdin.write('\n');
     expectedAnswers++;
   }
-  if (data.indexOf('Ingrese el password (postgres)') > 0) {
+  if (data.indexOf('Ingrese el password') > 0 && expectedAnswers === 4) {
     ls.stdin.write('\n');
     expectedAnswers++;
   }
-  if (data.indexOf('Ingrese el esquema al que quiere conectar (public)') > 0) {
+  if (data.indexOf('Ingrese el esquema al que quiere conectar') > 0 && expectedAnswers === 5) {
     ls.stdin.write('\n');
     expectedAnswers++;
   }
-  if (data.indexOf('Seleccione las tablas a generar artefactos') > 0) {
+  if (data.indexOf('Seleccione las tablas a generar artefactos') > 0 && expectedAnswers === 6) {
     ls.stdin.write('a\n');
     expectedAnswers++;
   }
-  if (data.indexOf('a) overwrite this and all others') > 0) {
+  if (data.indexOf('(ynaxdH)') > 0 && expectedAnswers === 7) {
     ls.stdin.write('a\n');
     expectedAnswers++;
   }
-  if (expectedAnswers >= 9) {
+  if (data.indexOf('(ynaxdH)') > 0 && expectedAnswers === 8) {
+    ls.stdin.write('a\n');
+    expectedAnswers++;
+  }
+  // if (data.indexOf('a) overwrite this and all others') > 0 && expectedAnswers === 9) {
+  //   ls.stdin.write('a\n');
+  //   expectedAnswers++;
+  // }
+  console.log(`expectedAnswers: ${expectedAnswers}`);
+  if (expectedAnswers >= 8) {
     ls.stdin.end();
   }
 });
