@@ -137,7 +137,7 @@ def protected():
 
 if __name__ == '__main__':
     db.init_app(app)
-    app.run()
+    app.run(host=os.environ.get("FLASK_HOST", default="localhost"), port=os.environ.get("FLASK_PORT", default=5000))
 # ONLY UNCOMMENT THIS IF DEBUGGING THROUGH PYCHARM
 # else:
 #     db.init_app(app)
