@@ -137,6 +137,8 @@ module.exports = class extends Generator {
     function pgToSQLAlchemyType(pgType) {
       if (pgType.startsWith('character varying'))
         return pgType.replace('character varying', 'String');
+      if (pgType === 'text') return 'String';
+      if (pgType.startsWith('character')) return 'String';
       if (['int', 'integer'].includes(pgType)) return 'Integer';
       if (pgType === 'bigint') return 'BigInteger';
       if (pgType === 'boolean') return 'Boolean';
@@ -145,6 +147,8 @@ module.exports = class extends Generator {
     }
     function pgToPythonType(pgType) {
       if (pgType.startsWith('character varying')) return 'str';
+      if (pgType === 'text') return 'str';
+      if (pgType.startsWith('character')) return 'str';
       if (['int', 'integer'].includes(pgType)) return 'int';
       if (pgType === 'bigint') return 'int';
       if (pgType === 'boolean') return 'bool';
@@ -153,6 +157,8 @@ module.exports = class extends Generator {
     }
     function pgToSwaggType(pgType) {
       if (pgType.startsWith('character varying')) return 'string';
+      if (pgType === 'text') return 'string';
+      if (pgType.startsWith('character')) return 'string';
       if (['int', 'integer'].includes(pgType)) return 'int';
       if (pgType === 'bigint') return 'int64';
       if (pgType === 'boolean') return 'boolean';
