@@ -1,9 +1,11 @@
 from flasgger import swag_from
+from flask import request
 from flask_jwt_extended import jwt_required
 from flask_restful import Resource, reqparse
-import logging 
+import logging
 from datetime import datetime
 from models.<%=snakeCase%> import <%=pascalCase%>Model
+from utils import restrict
 
 
 class <%=pascalCase%>(Resource):
@@ -19,7 +21,7 @@ class <%=pascalCase%>(Resource):
   <%_ } -%>
 <%_ }); -%>
 
-<%_ if(columns.length > 0) { 
+<%_ if(columns.length > 0) {
     firstColumnName = columns[0].columnName -%>
     @jwt_required
     @swag_from('../swagger/<%=snakeCase%>/get_<%=snakeCase%>.yaml')
@@ -58,7 +60,7 @@ class <%=pascalCase%>List(Resource):
     def get(self):
         return [x.json() for x in <%=pascalCase%>Model.find_all()]
 
-<%_ if(columns.length > 0) { 
+<%_ if(columns.length > 0) {
     firstColumnName = columns[0].columnName -%>
     @jwt_required
     @swag_from('../swagger/<%=snakeCase%>/post_<%=snakeCase%>.yaml')
@@ -79,3 +81,23 @@ class <%=pascalCase%>List(Resource):
 
         return <%=snakeCase%>.json(), 201
 <%_ } -%>
+
+
+class <%=pascalCase%>Search(Resource):
+
+    @jwt_required
+    @swag_from('../swagger/<%=snakeCase%>/search_<%=snakeCase%>.yaml')
+    def post(self):
+        query = <%=pascalCase%>Model.query
+        if request.json:
+            filters = request.json
+        <%_ columns.forEach(col => { -%>
+          <%_ if(col.pythonType === 'str') { -%>
+            query = restrict(query, filters, '<%=col.columnName%>', lambda x: <%=pascalCase%>Model.<%=col.columnName%>.contains(x))
+          <%_ } else if(col.pythonType === 'int') { -%>
+            query = restrict(query, filters, '<%=col.columnName%>', lambda x: <%=pascalCase%>Model.<%=col.columnName%> == x)
+          <%_ } else if(col.pythonType === 'bool') { -%>
+            query = restrict(query, filters, '<%=col.columnName%>', lambda x: x)
+          <%_ } -%>
+        <%_ }); -%>
+        return [x.json() for x in query.all()]

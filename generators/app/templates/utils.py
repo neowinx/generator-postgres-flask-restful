@@ -67,3 +67,10 @@ def _assign_if_something(obj: object, newdata: Namespace, key: str):
     if value is not None:
         obj.__setattr__(key, value)
 
+
+# Apply filter restrictions
+def restrict(query, filters, name, condition):
+    f = filters.get(name)
+    if f:
+        query = query.filter(condition(f))
+    return query
