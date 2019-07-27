@@ -41,4 +41,3 @@ definitions:
             <%=col.columnName%>: <%=Math.floor((Math.random() * 50) + 1);%>
           <%_ } -%>
         <%_ }); -%>
-<%_ } -%>

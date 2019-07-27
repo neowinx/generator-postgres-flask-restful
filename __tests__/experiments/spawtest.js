@@ -14,15 +14,15 @@ var expectedAnswers = 0;
 // STDOUT events
 ls.stdout.on('data', data => {
   console.log(`stdout: ${data}`);
-  if (data.indexOf('Ingrese el nombre del projecto') > 0) {
+  if (data.indexOf('Ingrese el nombre del projecto') > 0 && expectedAnswers === 0) {
     ls.stdin.write('\n');
     expectedAnswers++;
   }
-  if (data.indexOf('a) overwrite this and all others') > 0) {
+  if (data.indexOf('overwrite ') > 0 && expectedAnswers === 1) {
     ls.stdin.write('a\n');
     expectedAnswers++;
   }
-  if (expectedAnswers >= 2) {
+  if (expectedAnswers >= 1) {
     ls.stdin.end();
   }
 });

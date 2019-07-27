@@ -254,6 +254,11 @@ module.exports = class extends Generator {
             this.destinationPath(`swagger/${snakeCase}/delete_${snakeCase}.yaml`),
             templateData
           );
+          this.fs.copyTpl(
+            this.templatePath('search.yaml'),
+            this.destinationPath(`swagger/${snakeCase}/search_${snakeCase}.yaml`),
+            templateData
+          );
 
           if (this.fs.exists(this.destinationPath('app.py'))) {
             var appPy = this.fs.read(this.destinationPath('app.py'));
