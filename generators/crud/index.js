@@ -82,7 +82,7 @@ module.exports = class extends Generator {
       if (i < questions.length) {
         prompts.next(questions[i++]);
       } else {
-        console.log('connecting...');
+        this.log('connecting...');
         if (!massiveInst) {
           let opts = prmp.ui.answers;
           opts.excludeFunctions = true;
@@ -175,7 +175,7 @@ module.exports = class extends Generator {
         this.props.schema === this.db.currentSchema
           ? this.db[tableName]
           : this.db[this.props.schema][tableName];
-      console.log('Instrocpecting column types...');
+      this.log('instrocpecting column types...');
       this.db
         .query(
           `SELECT
