@@ -19,10 +19,10 @@ parameters:
   - name: body
     in: body
     schema:
-      $ref: "#/definitions/Search<%=pascalCase%>"
+      $ref: "#/definitions/<%=pascalCase%>Search"
   <%_ } -%>
 definitions:
-    Search<%=pascalCase%>:
+    <%=pascalCase%>Search:
         type: "object"
         properties:
         <%_ columns.forEach(col => { -%>

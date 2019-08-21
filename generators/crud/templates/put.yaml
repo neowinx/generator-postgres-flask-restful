@@ -22,9 +22,9 @@ parameters:
   - name: body
     in: body
     schema:
-      $ref: "#/definitions/<%=pascalCase%>"
+      $ref: "#/definitions/<%=pascalCase%>Put"
 definitions:
-    <%=pascalCase%>:
+    <%=pascalCase%>Put:
         type: "object"
         properties:
         <%_ columns.forEach(col => { -%>

@@ -19,9 +19,9 @@ parameters:
   - name: body
     in: body
     schema:
-      $ref: "#/definitions/<%=pascalCase%>"
+      $ref: "#/definitions/<%=pascalCase%>Post"
 definitions:
-    <%=pascalCase%>:
+    <%=pascalCase%>Post:
         type: "object"
         properties:
         <%_ columns.forEach(col => { -%>
