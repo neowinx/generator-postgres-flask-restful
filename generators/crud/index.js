@@ -263,6 +263,9 @@ module.exports = class extends Generator {
           if (this.fs.exists(this.destinationPath('app.py'))) {
             var appPy = this.fs.read(this.destinationPath('app.py'));
             let importsApp = this.fs.read(this.templatePath('imports_app.py'));
+            let permisionsAppPy = this.fs.read(
+              this.templatePath('permisions_app_py.ejs')
+            );
             let appendResourceApp = this.fs.read(
               this.templatePath('append_resource_app.py')
             );
@@ -281,6 +284,18 @@ module.exports = class extends Generator {
               this.dbURLChanged = true;
             }
 
+            var permisionsIndex = appPy.indexOf('permisions = [');
+            var permissionsBefore = appPy.substring(0, permisionsIndex + 15);
+            var permissionsAfter = appPy.substring(permisionsIndex + 16);
+            permisionsAppPy = `\n${permisionsAppPy}`;
+
+            if (permisionsIndex === -1) {
+              permisionsIndex = appPy.indexOf('app = Flask(');
+              permisionsAppPy = `permisions = [\n${permisionsAppPy}\n]\n`;
+              permissionsBefore = appPy.substring(0, permisionsIndex - 1);
+              permissionsAfter = appPy.substring(permisionsIndex);
+            }
+
             let mainIfIndex = appPy.indexOf(`if __name__ == '__main__'`);
 
             if (mainIfIndex === -1) {
@@ -293,7 +308,13 @@ module.exports = class extends Generator {
             this.fs.write(
               this.destinationPath('app.py'),
               ejs.render(
-                importsApp + appPyBefore + appendResourceApp + appPyAfter,
+                importsApp +
+                  permissionsBefore +
+                  permisionsAppPy +
+                  permissionsAfter +
+                  appPyBefore +
+                  appendResourceApp +
+                  appPyAfter,
                 templateData
               )
             );
