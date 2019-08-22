@@ -1,10 +1,11 @@
 import time
-
+from functools import wraps
 import datetime
 import decimal
 import hashlib
 from flask.json import JSONEncoder, JSONDecoder
 # Define custom JSONEncoder for the ISO Datetime format
+from flask_jwt_extended import get_jwt_identity, get_jwt_claims
 from flask_restful.reqparse import Namespace
 from json.decoder import WHITESPACE
 
@@ -74,3 +75,31 @@ def restrict(query, filters, name, condition):
     if f:
         query = query.filter(condition(f))
     return query
+
+
+# Encrypt password
+def sha1_pass(text: str):
+    m = hashlib.sha1()
+    m.update(text.encode('utf-8'))
+    d = m.digest()
+    t = ''
+    for aux in d:
+        c: int = aux & 0xff
+        hs = '{:02x}'.format(c)
+        t += hs
+    return t
+
+
+def check(permission):
+    def wrfunc(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            usuario = get_jwt_identity()
+            if usuario is None:
+                return {'message': 'No tiene permisos para realizar esta acción'}, 401
+            claims = get_jwt_claims()
+            if permission not in claims['permissions']:
+                return {'message': 'No tiene permisos para realizar esta acción'}, 401
+            return fn(*args, **kwargs)
+        return wrapper
+    return wrfunc
