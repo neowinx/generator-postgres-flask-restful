@@ -5,7 +5,7 @@ from flask_restful import Resource, reqparse
 import logging
 from datetime import datetime
 from models.<%=snakeCase%> import <%=pascalCase%>Model
-from utils import restrict
+from utils import restrict, check
 
 
 class <%=pascalCase%>(Resource):
@@ -24,6 +24,7 @@ class <%=pascalCase%>(Resource):
 <%_ if(columns.length > 0) {
     firstColumnName = columns[0].columnName -%>
     @jwt_required
+    @check('<%=snakeCase%>_get')
     @swag_from('../swagger/<%=snakeCase%>/get_<%=snakeCase%>.yaml')
     def get(self, <%=firstColumnName%>):
         <%=snakeCase%> = <%=pascalCase%>Model.find_by_<%=firstColumnName%>(<%=firstColumnName%>)
@@ -32,6 +33,7 @@ class <%=pascalCase%>(Resource):
         return {'message': 'No se encuentra <%=titleCase%>'}, 404
 
     @jwt_required
+    @check('<%=snakeCase%>_update')
     @swag_from('../swagger/<%=snakeCase%>/put_<%=snakeCase%>.yaml')
     def put(self, id):
         <%=snakeCase%> = <%=pascalCase%>Model.find_by_id(id)
@@ -43,6 +45,7 @@ class <%=pascalCase%>(Resource):
         return {'message': 'No se encuentra <%=titleCase%>'}, 404
 
     @jwt_required
+    @check('<%=snakeCase%>_delete')
     @swag_from('../swagger/<%=snakeCase%>/delete_<%=snakeCase%>.yaml')
     def delete(self, <%=firstColumnName%>):
         <%=snakeCase%> = <%=pascalCase%>Model.find_by_<%=firstColumnName%>(<%=firstColumnName%>)
@@ -56,6 +59,7 @@ class <%=pascalCase%>(Resource):
 class <%=pascalCase%>List(Resource):
 
     @jwt_required
+    @check('<%=snakeCase%>_list')
     @swag_from('../swagger/<%=snakeCase%>/list_<%=snakeCase%>.yaml')
     def get(self):
         return [x.json() for x in <%=pascalCase%>Model.find_all()]
@@ -63,6 +67,7 @@ class <%=pascalCase%>List(Resource):
 <%_ if(columns.length > 0) {
     firstColumnName = columns[0].columnName -%>
     @jwt_required
+    @check('<%=snakeCase%>_insert')
     @swag_from('../swagger/<%=snakeCase%>/post_<%=snakeCase%>.yaml')
     def post(self):
         data = <%=pascalCase%>.parser.parse_args()
@@ -86,6 +91,7 @@ class <%=pascalCase%>List(Resource):
 class <%=pascalCase%>Search(Resource):
 
     @jwt_required
+    @check('<%=snakeCase%>_search')
     @swag_from('../swagger/<%=snakeCase%>/search_<%=snakeCase%>.yaml')
     def post(self):
         query = <%=pascalCase%>Model.query
