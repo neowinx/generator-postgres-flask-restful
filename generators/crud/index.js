@@ -165,6 +165,14 @@ module.exports = class extends Generator {
       if (pgType === 'date') return 'date';
       if (pgType.startsWith('timestamp')) return 'datetime';
     }
+    function insertBefore(txt, search, insert) {
+      let position = txt.indexOf(search);
+      return [txt.slice(0, position), insert, txt.slice(position)].join('');
+    }
+    function insertAfter(txt, search, insert) {
+      let position = txt.indexOf(search) + search.length;
+      return [txt.slice(0, position), insert, txt.slice(position)].join('');
+    }
     this.props.tables.forEach(tableNameWithSchema => {
       let tableName = tableNameWithSchema.replace(`${this.props.schema}.`, '');
       let paramCase = changeCase.paramCase(tableName);
@@ -284,39 +292,23 @@ module.exports = class extends Generator {
               this.dbURLChanged = true;
             }
 
-            var permisionsIndex = appPy.indexOf('permisions = [');
-            var permissionsBefore = appPy.substring(0, permisionsIndex + 15);
-            var permissionsAfter = appPy.substring(permisionsIndex + 16);
-            permisionsAppPy = `\n${permisionsAppPy}`;
-
-            if (permisionsIndex === -1) {
-              permisionsIndex = appPy.indexOf('app = Flask(');
-              permisionsAppPy = `permisions = [\n${permisionsAppPy}\n]\n`;
-              permissionsBefore = appPy.substring(0, permisionsIndex - 1);
-              permissionsAfter = appPy.substring(permisionsIndex);
+            if (appPy.indexOf('permisions = [') > -1) {
+              appPy = insertAfter(appPy, 'permisions = [\n', `${permisionsAppPy}`);
+            } else {
+              appPy = insertBefore(
+                appPy,
+                'app = Flask(',
+                `\npermisions = [\n${permisionsAppPy}]\n\n\n`
+              );
             }
 
-            let mainIfIndex = appPy.indexOf(`if __name__ == '__main__'`);
-
-            if (mainIfIndex === -1) {
-              mainIfIndex = appPy.length;
+            if (appPy.indexOf(`if __name__ == '__main__'`) > -1) {
+              appPy = insertBefore(appPy, `if __name__ == '__main__'`, appendResourceApp);
             }
-
-            let appPyBefore = appPy.substring(0, mainIfIndex - 1);
-            let appPyAfter = appPy.substring(mainIfIndex);
 
             this.fs.write(
               this.destinationPath('app.py'),
-              ejs.render(
-                importsApp +
-                  permissionsBefore +
-                  permisionsAppPy +
-                  permissionsAfter +
-                  appPyBefore +
-                  appendResourceApp +
-                  appPyAfter,
-                templateData
-              )
+              ejs.render(importsApp + appPy, templateData)
             );
           }
         });
