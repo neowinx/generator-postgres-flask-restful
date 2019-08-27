@@ -103,3 +103,12 @@ def check(permission):
             return fn(*args, **kwargs)
         return wrapper
     return wrfunc
+
+
+def paginated_results(query):
+    paginated = query.paginate(page=request.args.get('page', 1, int))
+    return {
+        'page': paginated.page,
+        'pages': paginated.pages,
+        'items': [x.json() for x in paginated.items]
+    }

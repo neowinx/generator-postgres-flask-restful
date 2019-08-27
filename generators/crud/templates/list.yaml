@@ -16,4 +16,8 @@ parameters:
     description: Access token
     required: true
     default: Bearer [access_token]
+  - in: query
+    name: page
+    description: Current items page
+    default: 1
 <%_ } -%>

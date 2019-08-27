@@ -5,7 +5,7 @@ from flask_restful import Resource, reqparse
 import logging
 from datetime import datetime
 from models.<%=snakeCase%> import <%=pascalCase%>Model
-from utils import restrict, check
+from utils import restrict, check, paginated_results
 
 
 class <%=pascalCase%>(Resource):
@@ -62,7 +62,7 @@ class <%=pascalCase%>List(Resource):
     @check('<%=snakeCase%>_list')
     @swag_from('../swagger/<%=snakeCase%>/list_<%=snakeCase%>.yaml')
     def get(self):
-        return [x.json() for x in <%=pascalCase%>Model.find_all()]
+        return paginated_results(query)
 
 <%_ if(columns.length > 0) {
     firstColumnName = columns[0].columnName -%>
@@ -106,4 +106,4 @@ class <%=pascalCase%>Search(Resource):
             query = restrict(query, filters, '<%=col.columnName%>', lambda x: x)
           <%_ } -%>
         <%_ }); -%>
-        return [x.json() for x in query.all()]
+        return paginated_results(query)
