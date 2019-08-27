@@ -36,6 +36,8 @@ definitions:
             <%=col.columnName%>: '2019-01-01'
           <%_ } else if(col.swaggerType === 'datetime') { -%>
             <%=col.columnName%>: '2019-01-01T00:00:00'
+          <%_ } else if(col.swaggerType && col.swaggerType.startsWith('float')) { -%>
+            <%=col.columnName%>: <%=Math.floor((Math.random() * 50) + 1);%>.5
           <%_ } else if(col.swaggerType && col.swaggerType.startsWith('int')) { -%>
             <%=col.columnName%>: <%=Math.floor((Math.random() * 50) + 1);%>
           <%_ } -%>
