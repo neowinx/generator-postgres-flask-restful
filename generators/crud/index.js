@@ -144,6 +144,7 @@ module.exports = class extends Generator {
       if (pgType === 'bigint') return 'BigInteger';
       if (pgType === 'boolean') return 'Boolean';
       if (pgType === 'date') return 'Date';
+      if (pgType === 'bytea') return 'LargeBinary';
       if (pgType.startsWith('timestamp')) return 'DateTime';
     }
     function pgToPythonType(pgType) {
@@ -155,6 +156,7 @@ module.exports = class extends Generator {
       if (pgType === 'bigint') return 'int';
       if (pgType === 'boolean') return 'bool';
       if (pgType === 'date') return 'date';
+      if (pgType === 'bytea') return 'bytearray';
       if (pgType.startsWith('timestamp')) return 'datetime';
     }
     function pgToSwaggType(pgType) {
@@ -166,6 +168,7 @@ module.exports = class extends Generator {
       if (pgType === 'bigint') return 'int64';
       if (pgType === 'boolean') return 'boolean';
       if (pgType === 'date') return 'date';
+      if (pgType === 'bytea') return 'byte';
       if (pgType.startsWith('timestamp')) return 'datetime';
     }
     function insertBefore(txt, search, insert) {

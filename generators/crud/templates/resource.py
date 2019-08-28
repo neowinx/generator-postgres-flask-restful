@@ -1,9 +1,11 @@
+import base64
+import logging
+from datetime import datetime
+
 from flasgger import swag_from
 from flask import request
 from flask_jwt_extended import jwt_required
 from flask_restful import Resource, reqparse
-import logging
-from datetime import datetime
 from models.<%=snakeCase%> import <%=pascalCase%>Model
 from utils import restrict, check, paginated_results
 
@@ -16,6 +18,8 @@ class <%=pascalCase%>(Resource):
     parser.add_argument('<%=col.columnName%>', type=lambda x: datetime.strptime(x, '%Y-%m-%d').date())
   <%_ } else if(col.pythonType === 'datetime') { -%>
     parser.add_argument('<%=col.columnName%>', type=lambda x: datetime.strptime(x, '%Y-%m-%dT%H:%M:%S'))
+  <%_ } else if(col.pythonType === 'bytearray') { -%>
+    parser.add_argument('<%=col.columnName%>', type=lambda x: base64.decodebytes(x.encode()))
   <%_ } else { -%>
     parser.add_argument('<%=col.columnName%>', type=<%=col.pythonType%>)
   <%_ } -%>
@@ -26,8 +30,8 @@ class <%=pascalCase%>(Resource):
     @jwt_required
     @check('<%=snakeCase%>_get')
     @swag_from('../swagger/<%=snakeCase%>/get_<%=snakeCase%>.yaml')
-    def get(self, <%=firstColumnName%>):
-        <%=snakeCase%> = <%=pascalCase%>Model.find_by_<%=firstColumnName%>(<%=firstColumnName%>)
+    def get(self, id):
+        <%=snakeCase%> = <%=pascalCase%>Model.find_by_id(id)
         if <%=snakeCase%>:
             return <%=snakeCase%>.json()
         return {'message': 'No se encuentra <%=titleCase%>'}, 404
@@ -47,8 +51,8 @@ class <%=pascalCase%>(Resource):
     @jwt_required
     @check('<%=snakeCase%>_delete')
     @swag_from('../swagger/<%=snakeCase%>/delete_<%=snakeCase%>.yaml')
-    def delete(self, <%=firstColumnName%>):
-        <%=snakeCase%> = <%=pascalCase%>Model.find_by_<%=firstColumnName%>(<%=firstColumnName%>)
+    def delete(self, id):
+        <%=snakeCase%> = <%=pascalCase%>Model.find_by_id(id)
         if <%=snakeCase%>:
             <%=snakeCase%>.delete_from_db()
 
@@ -73,10 +77,10 @@ class <%=pascalCase%>List(Resource):
     def post(self):
         data = <%=pascalCase%>.parser.parse_args()
 
-        <%=firstColumnName%> = data.get('<%=firstColumnName%>')
+        id = data.get('id')
 
-        if <%=firstColumnName%> is not None and <%=pascalCase%>Model.find_by_<%=firstColumnName%>(<%=firstColumnName%>):
-            return {'message': "Ya existe un <%=snakeCase%> con <%=firstColumnName%> '{}'.".format(<%=firstColumnName%>)}, 400
+        if id is not None and <%=pascalCase%>Model.find_by_id(id):
+            return {'message': "Ya existe un <%=snakeCase%> con id '{}'.".format(id)}, 400
 
         <%=snakeCase%> = <%=pascalCase%>Model(**data)
         try:

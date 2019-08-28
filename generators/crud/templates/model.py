@@ -1,3 +1,5 @@
+import base64
+
 from flask_restful.reqparse import Namespace
 
 from db import db
@@ -7,7 +9,7 @@ from utils import _assign_if_something
 class <%=pascalCase%>Model(db.Model):
     __tablename__ = '<%=tableName%>'
     <%_ if(schemaName != 'public') { -%>
-    __table_args__ = {"schema":"<%=schemaName%>"}
+    __table_args__ = {"schema": "<%=schemaName%>"}
     <%_ } -%>
 
     <%_ columns.forEach(col => { -%>
@@ -18,7 +20,7 @@ class <%=pascalCase%>Model(db.Model):
     <%_   } -%>
     <%_ }) -%>
 
-    <%_ if(columns.length > 0) { 
+    <%_ if(columns.length > 0) {
         columnsArgs = columns.map(col => col.columnName).join(', ') -%>
     def __init__(self, <%=columnsArgs%>):
         <%_ columns.forEach(col =>{ -%>
@@ -29,7 +31,11 @@ class <%=pascalCase%>Model(db.Model):
     def json(self):
         return {
     <%_ columns.forEach(col => { -%>
-            '<%=col.columnName%>': self.<%=col.columnName + ','%>
+        <%_ if(col.pythonType === 'bytearray') { -%>
+            '<%=col.columnName%>': base64.b64encode(self.<%=col.columnName%>).decode() if self.<%=col.columnName%> else None,
+        <%_ } else { -%>
+            '<%=col.columnName%>': self.<%=col.columnName%>,
+        <%_ } -%>
     <%_})-%>
         }
 
