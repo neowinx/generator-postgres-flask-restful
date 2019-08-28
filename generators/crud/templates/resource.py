@@ -62,6 +62,7 @@ class <%=pascalCase%>List(Resource):
     @check('<%=snakeCase%>_list')
     @swag_from('../swagger/<%=snakeCase%>/list_<%=snakeCase%>.yaml')
     def get(self):
+        query = <%=pascalCase%>Model.query
         return paginated_results(query)
 
 <%_ if(columns.length > 0) {
