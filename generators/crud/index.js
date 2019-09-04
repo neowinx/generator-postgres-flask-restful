@@ -308,6 +308,14 @@ module.exports = class extends Generator {
               );
             }
 
+            if (appPy.indexOf('@jwt.user_claims_loader') === -1) {
+              appPy = insertAfter(
+                appPy,
+                'blacklist = set()',
+                this.fs.read(this.templatePath('claim_loader_app_py.ejs'))
+              );
+            }
+
             if (appPy.indexOf(`if __name__ == '__main__'`) > -1) {
               appPy = insertBefore(appPy, `if __name__ == '__main__'`, appendResourceApp);
             }

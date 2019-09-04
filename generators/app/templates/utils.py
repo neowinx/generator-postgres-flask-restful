@@ -3,6 +3,8 @@ from functools import wraps
 import datetime
 import decimal
 import hashlib
+
+from flask import request
 from flask.json import JSONEncoder, JSONDecoder
 # Define custom JSONEncoder for the ISO Datetime format
 from flask_jwt_extended import get_jwt_identity, get_jwt_claims
@@ -90,7 +92,7 @@ def sha1_pass(text: str):
     return t
 
 
-def check(permission):
+def check(permision):
     def wrfunc(fn):
         @wraps(fn)
         def wrapper(*args, **kwargs):
@@ -98,7 +100,7 @@ def check(permission):
             if usuario is None:
                 return {'message': 'No tiene permisos para realizar esta acción'}, 401
             claims = get_jwt_claims()
-            if permission not in claims['permissions']:
+            if permision not in claims['permisions']:
                 return {'message': 'No tiene permisos para realizar esta acción'}, 401
             return fn(*args, **kwargs)
         return wrapper
