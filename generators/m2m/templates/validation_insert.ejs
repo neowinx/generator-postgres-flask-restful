@@ -1,0 +1,9 @@
+
+        if <%=secondarySnake%>s and len(<%=secondarySnake%>s) > 0:
+
+            db<%=secondarySnake%>s = <%=secondaryPascal%>Model.query.filter(<%=secondaryPascal%>Model.<%=secondaryKeySnake%>.in_(<%=secondarySnake%>s)).all()
+            
+            if len(db<%=secondarySnake%>s) != len(<%=secondarySnake%>s):
+                return {'message': "Algunos <%=secondarySnake%>s no se encontraron '{}'.".format(<%=secondarySnake%>s)}, 400
+            
+            <%=primarySnake%>.<%=secondarySnake%>s = db<%=secondarySnake%>s

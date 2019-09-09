@@ -77,7 +77,7 @@ class <%=pascalCase%>List(Resource):
     def post(self):
         data = <%=pascalCase%>.parser.parse_args()
 
-        id = data.get('id')
+        <%=pk[0]%> = data.get('<%=pk[0]%>')
 
         if id is not None and <%=pascalCase%>Model.find_by_id(id):
             return {'message': "Ya existe un <%=snakeCase%> con id '{}'.".format(id)}, 400
