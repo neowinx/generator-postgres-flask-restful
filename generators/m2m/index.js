@@ -60,6 +60,9 @@ module.exports = class extends Generator {
     if (fs.existsSync(resourcePath)) {
       var resource = this.fs.read(resourcePath);
 
+      resource =
+        `from models.${secondarySnake} import ${secondaryPascal}Model\n` + resource;
+
       let reqparseInsert = this.fs.read(this.templatePath('reqparse_insert.ejs'));
       resource = utils.insertBefore(resource, '    @jwt_required', reqparseInsert);
 
@@ -77,19 +80,30 @@ module.exports = class extends Generator {
         validationInsert
       );
 
-      this.fs.write(this.destinationPath(resourcePath), ejs.render(resource, this.props));
+      this.fs.write(resourcePath, ejs.render(resource, this.props));
     }
 
     let modelPath = this.destinationPath(`models/${primarySnake}.py`);
     if (fs.existsSync(modelPath)) {
       var model = this.fs.read(modelPath);
-      utils.insertBefore(
+
+      model = `from models.${secondarySnake} import ${secondaryPascal}Model\n` + model;
+
+      model = utils.insertBefore(
         model,
-        'def __init__',
-        `${secondarySnake}s = db.relationship(${secondaryPascal}Model, secondary="${
+        '\n    def __init__',
+        `    ${secondarySnake}s = db.relationship(${secondaryPascal}Model, secondary="${
           this.props.association_table
         }")\n`
       );
+
+      model = utils.insertAfter(
+        model,
+        'def json(self):\n        return {',
+        `\n            '${secondarySnake}s': [i.json() for i in self.${secondarySnake}s],`
+      );
+
+      this.fs.write(modelPath, ejs.render(model, this.props));
     }
   }
 };
