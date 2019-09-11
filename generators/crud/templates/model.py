@@ -59,6 +59,6 @@ class <%=pascalCase%>Model(db.Model):
         db.session.commit()
 
     def from_reqparse(self, newdata: Namespace):
-        for no_pk_key in <%-columns.filter(c => !pk.includes(c.columnName)).map(c => `'${ c.columnName }'`)%>:
+        for no_pk_key in [<%-columns.filter(c => !pk.includes(c.columnName)).map(c => `'${ c.columnName }'`)%>]:
             _assign_if_something(self, newdata, no_pk_key)
 
