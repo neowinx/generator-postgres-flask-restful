@@ -42,7 +42,9 @@
   },
   "jest": {
     "testEnvironment": "node",
-    "modulePathIgnorePatterns": ["experiments"]
+    "modulePathIgnorePatterns": [
+      "experiments"
+    ]
   },
   "lint-staged": {
     "*.js": [
