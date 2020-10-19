@@ -28,7 +28,7 @@ class <%=pascalCase%>Model(db.Model):
         <%_ }) -%>
     <%_ } -%>
 
-    def json(self):
+    def json(self, jsondepth=0):
         return {
     <%_ columns.forEach(col => { -%>
         <%_ if(col.pythonType === 'bytearray') { -%>

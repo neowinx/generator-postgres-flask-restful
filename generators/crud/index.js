@@ -1,5 +1,6 @@
 'use strict';
 const Generator = require('yeoman-generator');
+const os = require('os');
 const chalk = require('chalk');
 const yosay = require('yosay');
 const changeCase = require('change-case');
@@ -299,7 +300,7 @@ module.exports = class extends Generator {
             }
 
             if (appPy.indexOf('permisions = [') > -1) {
-              appPy = insertAfter(appPy, 'permisions = [\n', `${permisionsAppPy}`);
+              appPy = insertAfter(appPy, `permisions = [${os.EOL}`, `${permisionsAppPy}`);
             } else {
               appPy = insertBefore(
                 appPy,

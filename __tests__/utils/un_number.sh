@@ -1,7 +1,7 @@
 #!/bin/bash
 
 USER=postgres
-DATABASE=akatosh
+DATABASE=sms
 
 function exit_if_null {
   if [ "$1" == ""  ]; then
