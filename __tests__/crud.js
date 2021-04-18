@@ -29,7 +29,7 @@ describe('generator-flask-restful:crud', () => {
       done.fail('Docker is not running. error:' + error);
     }
 
-    let schemaPath = path.join(__dirname, 'schema.sql');
+    let schemaPath = path.join(__dirname, '../schema.sql');
 
     console.log('stopping ALL postgres running containers...');
     let psdata = await docker.command('ps');
@@ -40,7 +40,7 @@ describe('generator-flask-restful:crud', () => {
     });
     console.log('starting a new postgres container on port 15432...');
     let nucontainer = await docker.command(
-      `run --rm -d -p 15432:5432 -v ${schemaPath}:/tmp/schema.sql -e POSTGRES_PASSWORD=postgres postgres`
+      `run --rm -d -p 15432:5432 -v ${schemaPath}:/tmp/schema.sql -e POSTGRES_PASSWORD=postgres postgres:9`
     );
 
     console.log('waiting 5 seconds for the database to warm up...');

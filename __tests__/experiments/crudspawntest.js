@@ -15,7 +15,10 @@ ls.stdout.on('data', data => {
     ls.stdin.write('15432\n');
     expectedAnswers++;
   }
-  if (data.indexOf('Ingrese el nombre de la base de datos') > 0 && expectedAnswers === 2) {
+  if (
+    data.indexOf('Ingrese el nombre de la base de datos') > 0 &&
+    expectedAnswers === 2
+  ) {
     ls.stdin.write('db\n');
     expectedAnswers++;
   }
@@ -27,11 +30,17 @@ ls.stdout.on('data', data => {
     ls.stdin.write('\n');
     expectedAnswers++;
   }
-  if (data.indexOf('Ingrese el esquema al que quiere conectar') > 0 && expectedAnswers === 5) {
+  if (
+    data.indexOf('Ingrese el esquema al que quiere conectar') > 0 &&
+    expectedAnswers === 5
+  ) {
     ls.stdin.write('\n');
     expectedAnswers++;
   }
-  if (data.indexOf('Seleccione las tablas a generar artefactos') > 0 && expectedAnswers === 6) {
+  if (
+    data.indexOf('Seleccione las tablas a generar artefactos') > 0 &&
+    expectedAnswers === 6
+  ) {
     ls.stdin.write('a\n');
     expectedAnswers++;
   }
@@ -43,6 +52,7 @@ ls.stdout.on('data', data => {
     ls.stdin.write('a\n');
     expectedAnswers++;
   }
+  // Not sure if this part is necessary, sometimes works and sometimes don't
   // if (data.indexOf('a) overwrite this and all others') > 0 && expectedAnswers === 9) {
   //   ls.stdin.write('a\n');
   //   expectedAnswers++;
