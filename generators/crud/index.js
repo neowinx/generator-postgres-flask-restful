@@ -142,6 +142,7 @@ module.exports = class extends Generator {
       if (pgType.startsWith('character')) return 'String';
       if (['int', 'integer', 'smallint'].includes(pgType)) return 'Integer';
       if (['float', 'double precision'].includes(pgType)) return 'Float';
+      if (['decimal', 'numeric'].includes(pgType)) return 'Numeric';
       if (pgType === 'bigint') return 'BigInteger';
       if (pgType === 'boolean') return 'Boolean';
       if (pgType === 'date') return 'Date';
@@ -153,7 +154,8 @@ module.exports = class extends Generator {
       if (pgType === 'text') return 'str';
       if (pgType.startsWith('character')) return 'str';
       if (['int', 'integer', 'smallint'].includes(pgType)) return 'int';
-      if (['float', 'double precision'].includes(pgType)) return 'float';
+      if (['float', 'double precision', 'decimal', 'numeric'].includes(pgType))
+        return 'float';
       if (pgType === 'bigint') return 'int';
       if (pgType === 'boolean') return 'bool';
       if (pgType === 'date') return 'date';
@@ -165,7 +167,8 @@ module.exports = class extends Generator {
       if (pgType === 'text') return 'string';
       if (pgType.startsWith('character')) return 'string';
       if (['int', 'integer', 'smallint'].includes(pgType)) return 'int';
-      if (['float', 'double precision'].includes(pgType)) return 'float';
+      if (['float', 'double precision', 'decimal', 'numeric'].includes(pgType))
+        return 'float';
       if (pgType === 'bigint') return 'int64';
       if (pgType === 'boolean') return 'boolean';
       if (pgType === 'date') return 'date';
