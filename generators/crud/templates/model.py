@@ -14,17 +14,17 @@ class <%=pascalCase%>Model(db.Model):
 
     <%_ columns.forEach(col => { -%>
     <%_   if(pk.includes(col.columnName)) { -%>
-    <%=col.columnName%> = db.Column(db.<%=col.sqlAlchemyType%>, primary_key=True)
+    <%=col.columnNameSnakeCase%> = db.Column(db.<%=col.sqlAlchemyType%>, primary_key=True)
     <%_   } else { -%>
-    <%=col.columnName%> = db.Column(db.<%=col.sqlAlchemyType%>)
+    <%=col.columnNameSnakeCase%> = db.Column(db.<%=col.sqlAlchemyType%>)
     <%_   } -%>
     <%_ }) -%>
 
     <%_ if(columns.length > 0) {
-        columnsArgs = columns.map(col => col.columnName).join(', ') -%>
+        columnsArgs = columns.map(col => col.columnNameSnakeCase).join(', ') -%>
     def __init__(self, <%=columnsArgs%>):
         <%_ columns.forEach(col =>{ -%>
-        self.<%=col.columnName%> = <%=col.columnName%>
+        self.<%=col.columnNameSnakeCase%> = <%=col.columnNameSnakeCase%>
         <%_ }) -%>
     <%_ } -%>
 
@@ -32,15 +32,15 @@ class <%=pascalCase%>Model(db.Model):
         return {
     <%_ columns.forEach(col => { -%>
         <%_ if(col.pythonType === 'bytearray') { -%>
-            '<%=col.columnName%>': base64.b64encode(self.<%=col.columnName%>).decode() if self.<%=col.columnName%> else None,
+            '<%=col.columnNameSnakeCase%>': base64.b64encode(self.<%=col.columnNameSnakeCase%>).decode() if self.<%=col.columnNameSnakeCase%> else None,
         <%_ } else { -%>
-            '<%=col.columnName%>': self.<%=col.columnName%>,
+            '<%=col.columnNameSnakeCase%>': self.<%=col.columnNameSnakeCase%>,
         <%_ } -%>
     <%_})-%>
         }
 
     <%_ if(columns.length > 0) {
-        firstColumn = columns[0].columnName -%>
+        firstColumn = columns[0].columnNameSnakeCase -%>
     @classmethod
     def find_by_<%=firstColumn%>(cls, <%=firstColumn%>):
         return cls.query.filter_by(<%=firstColumn%>=<%=firstColumn%>).first()
@@ -59,6 +59,6 @@ class <%=pascalCase%>Model(db.Model):
         db.session.commit()
 
     def from_reqparse(self, newdata: Namespace):
-        for no_pk_key in [<%-columns.filter(c => !pk.includes(c.columnName)).map(c => `'${ c.columnName }'`)%>]:
+        for no_pk_key in [<%-columns.filter(c => !pk.includes(c.columnName)).map(c => `'${ c.columnNameSnakeCase }'`)%>]:
             _assign_if_something(self, newdata, no_pk_key)
 

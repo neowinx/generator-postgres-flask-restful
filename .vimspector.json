@@ -1,0 +1,28 @@
+{
+  "configurations": {
+    "app": {
+      "adapter": "vscode-node",
+      "configuration": {
+        "request": "launch",
+        "protocol": "auto",
+        "stopOnEntry": false,
+        "console": "integratedTerminal",
+        "program": "~/APPS/DESARROLLO/NODE/node-v12.19.0-linux-x64/bin/yo",
+        "args": "postgres-flask-restful",
+        "cwd": "~/PROJECTS/CODELAB/GENERATED/postgres-flask-restful"
+      }
+    },
+    "crud": {
+      "adapter": "vscode-node",
+      "configuration": {
+        "request": "launch",
+        "protocol": "auto",
+        "stopOnEntry": false,
+        "console": "integratedTerminal",
+        "program": "~/APPS/DESARROLLO/NODE/node-v12.19.0-linux-x64/bin/yo",
+        "args": "postgres-flask-restful:crud",
+        "cwd": "~/PROJECTS/CODELAB/GENERATED/postgres-flask-restful"
+      }
+    }
+  }
+}

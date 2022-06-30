@@ -10,7 +10,7 @@ responses:
   422:
     description: El access_token no es válido. (Not enough segments, invalid utf-8 chars, etc.)
 <%_ if(columns.length > 0) { 
-    firstColumnName = columns[0].columnName -%>
+    firstColumnName = columns[0].columnNameSnakeCase -%>
 parameters:
   - in: header
     name: Authorization

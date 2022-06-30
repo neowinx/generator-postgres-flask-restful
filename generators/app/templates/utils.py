@@ -7,7 +7,7 @@ import hashlib
 from flask import request
 from flask.json import JSONEncoder, JSONDecoder
 # Define custom JSONEncoder for the ISO Datetime format
-from flask_jwt_extended import get_jwt_identity, get_jwt_claims
+from flask_jwt_extended import get_jwt_identity, get_jwt
 from flask_restful.reqparse import Namespace
 from json.decoder import WHITESPACE
 
@@ -99,7 +99,7 @@ def check(permision):
             usuario = get_jwt_identity()
             if usuario is None:
                 return {'message': 'No tiene permisos para realizar esta acción'}, 401
-            claims = get_jwt_claims()
+            claims = get_jwt()
             if permision not in claims['permisions']:
                 return {'message': 'No tiene permisos para realizar esta acción'}, 401
             return fn(*args, **kwargs)

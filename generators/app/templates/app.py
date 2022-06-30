@@ -6,7 +6,7 @@ from flask_cors import CORS
 from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token,
     get_jwt_identity,
-    get_raw_jwt)
+    get_jwt)
 from flask_restful import Api, Resource
 from utils import JSONEncoder, unique_md5, JSONDecoder
 
@@ -78,10 +78,10 @@ jwt = JWTManager(app)
 blacklist = set()
 
 
-@jwt.token_in_blacklist_loader
-def check_if_token_in_blacklist(decrypted_token):
-    jti = decrypted_token['jti']
-    return jti in blacklist
+@jwt.token_in_blocklist_loader
+def check_if_token_in_blacklist(jwt_header, jwt_payload:dict):
+    jti = jwt_payload['jti']
+    # TODO: Replace this with a centralized cache service (Redis, Mongo, a database, etc.) return jti in blacklist
 
 
 ######################
@@ -116,10 +116,10 @@ def login():
 
 
 @app.route('/logout', methods=['DELETE'])
-@jwt_required
+@jwt_required()
 @swag_from('swagger/flask_jwt_extended/logout.yaml')
 def logout():
-    jti = get_raw_jwt()['jti']
+    jti = get_jwt()['jti']
     blacklist.add(jti)
     return jsonify({"msg": "Successfully logged out"}), 200
 
@@ -127,7 +127,7 @@ def logout():
 # Protect a view with jwt_required, which requires a valid access token
 # in the request to access.
 @app.route('/protected', methods=['GET'])
-@jwt_required
+@jwt_required()
 @swag_from('swagger/protected/example.yaml')
 def protected():
     # Access the identity of the current user with get_jwt_identity

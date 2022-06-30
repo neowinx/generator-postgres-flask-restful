@@ -15,19 +15,19 @@ class <%=pascalCase%>(Resource):
     parser = reqparse.RequestParser()
 <%_ columns.forEach(col => { -%>
   <%_ if(col.pythonType === 'date') { -%>
-    parser.add_argument('<%=col.columnName%>', type=lambda x: datetime.strptime(x, '%Y-%m-%d').date())
+    parser.add_argument('<%=col.columnNameSnakeCase%>', type=lambda x: datetime.strptime(x, '%Y-%m-%d').date())
   <%_ } else if(col.pythonType === 'datetime') { -%>
-    parser.add_argument('<%=col.columnName%>', type=lambda x: datetime.strptime(x, '%Y-%m-%dT%H:%M:%S'))
+    parser.add_argument('<%=col.columnNameSnakeCase%>', type=lambda x: datetime.strptime(x, '%Y-%m-%dT%H:%M:%S'))
   <%_ } else if(col.pythonType === 'bytearray') { -%>
-    parser.add_argument('<%=col.columnName%>', type=lambda x: base64.decodebytes(x.encode()))
+    parser.add_argument('<%=col.columnNameSnakeCase%>', type=lambda x: base64.decodebytes(x.encode()))
   <%_ } else { -%>
-    parser.add_argument('<%=col.columnName%>', type=<%=col.pythonType%>)
+    parser.add_argument('<%=col.columnNameSnakeCase%>', type=<%=col.pythonType%>)
   <%_ } -%>
 <%_ }); -%>
 
 <%_ if(columns.length > 0) {
-    firstColumnName = columns[0].columnName -%>
-    @jwt_required
+    firstColumnName = columns[0].columnNameSnakeCase -%>
+    @jwt_required()
     @check('<%=snakeCase%>_get')
     @swag_from('../swagger/<%=snakeCase%>/get_<%=snakeCase%>.yaml')
     def get(self, id):
@@ -36,7 +36,7 @@ class <%=pascalCase%>(Resource):
             return <%=snakeCase%>.json()
         return {'message': 'No se encuentra <%=titleCase%>'}, 404
 
-    @jwt_required
+    @jwt_required()
     @check('<%=snakeCase%>_update')
     @swag_from('../swagger/<%=snakeCase%>/put_<%=snakeCase%>.yaml')
     def put(self, id):
@@ -48,7 +48,7 @@ class <%=pascalCase%>(Resource):
             return <%=snakeCase%>.json()
         return {'message': 'No se encuentra <%=titleCase%>'}, 404
 
-    @jwt_required
+    @jwt_required()
     @check('<%=snakeCase%>_delete')
     @swag_from('../swagger/<%=snakeCase%>/delete_<%=snakeCase%>.yaml')
     def delete(self, id):
@@ -62,7 +62,7 @@ class <%=pascalCase%>(Resource):
 
 class <%=pascalCase%>List(Resource):
 
-    @jwt_required
+    @jwt_required()
     @check('<%=snakeCase%>_list')
     @swag_from('../swagger/<%=snakeCase%>/list_<%=snakeCase%>.yaml')
     def get(self):
@@ -70,8 +70,8 @@ class <%=pascalCase%>List(Resource):
         return paginated_results(query)
 
 <%_ if(columns.length > 0) {
-    firstColumnName = columns[0].columnName -%>
-    @jwt_required
+    firstColumnName = columns[0].columnNameSnakeCase -%>
+    @jwt_required()
     @check('<%=snakeCase%>_insert')
     @swag_from('../swagger/<%=snakeCase%>/post_<%=snakeCase%>.yaml')
     def post(self):
@@ -95,7 +95,7 @@ class <%=pascalCase%>List(Resource):
 
 class <%=pascalCase%>Search(Resource):
 
-    @jwt_required
+    @jwt_required()
     @check('<%=snakeCase%>_search')
     @swag_from('../swagger/<%=snakeCase%>/search_<%=snakeCase%>.yaml')
     def post(self):
@@ -104,11 +104,11 @@ class <%=pascalCase%>Search(Resource):
             filters = request.json
         <%_ columns.forEach(col => { -%>
           <%_ if(col.pythonType === 'str') { -%>
-            query = restrict(query, filters, '<%=col.columnName%>', lambda x: <%=pascalCase%>Model.<%=col.columnName%>.contains(x))
+            query = restrict(query, filters, '<%=col.columnNameSnakeCase%>', lambda x: <%=pascalCase%>Model.<%=col.columnNameSnakeCase%>.contains(x))
           <%_ } else if(col.pythonType === 'int') { -%>
-            query = restrict(query, filters, '<%=col.columnName%>', lambda x: <%=pascalCase%>Model.<%=col.columnName%> == x)
+            query = restrict(query, filters, '<%=col.columnNameSnakeCase%>', lambda x: <%=pascalCase%>Model.<%=col.columnNameSnakeCase%> == x)
           <%_ } else if(col.pythonType === 'bool') { -%>
-            query = restrict(query, filters, '<%=col.columnName%>', lambda x: x)
+            query = restrict(query, filters, '<%=col.columnNameSnakeCase%>', lambda x: x)
           <%_ } -%>
         <%_ }); -%>
         return paginated_results(query)

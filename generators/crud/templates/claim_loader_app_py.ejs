@@ -1,6 +1,6 @@
 
 # Change this to get permissions from your permission store (database, redis, cache, file, etc.)
-@jwt.user_claims_loader
+@jwt.additional_claims_loader
 def add_claims_to_access_token(identity):
     return {
         'permisions': permisions

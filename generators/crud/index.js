@@ -4,6 +4,7 @@ const os = require('os');
 const chalk = require('chalk');
 const yosay = require('yosay');
 const changeCase = require('change-case');
+const { titleCase } = require("title-case");
 const ejs = require('ejs');
 const Rx = require('rxjs');
 const inquirer = require('inquirer');
@@ -138,8 +139,8 @@ module.exports = class extends Generator {
     function pgToSQLAlchemyType(pgType) {
       if (pgType.startsWith('character varying'))
         return pgType.replace('character varying', 'String');
-      if (pgType === 'text') return 'String';
       if (pgType.startsWith('character')) return 'String';
+      if (['text', 'json'].includes(pgType)) return 'String';
       if (['int', 'integer', 'smallint'].includes(pgType)) return 'Integer';
       if (['float', 'double precision'].includes(pgType)) return 'Float';
       if (pgType === 'decimal' || pgType.startsWith('numeric')) return 'Numeric';
@@ -151,8 +152,8 @@ module.exports = class extends Generator {
     }
     function pgToPythonType(pgType) {
       if (pgType.startsWith('character varying')) return 'str';
-      if (pgType === 'text') return 'str';
       if (pgType.startsWith('character')) return 'str';
+      if (['text', 'json'].includes(pgType)) return 'str';
       if (['int', 'integer', 'smallint'].includes(pgType)) return 'int';
       if (
         ['float', 'double precision', 'decimal'].includes(pgType) ||
@@ -167,8 +168,8 @@ module.exports = class extends Generator {
     }
     function pgToSwaggType(pgType) {
       if (pgType.startsWith('character varying')) return 'string';
-      if (pgType === 'text') return 'string';
       if (pgType.startsWith('character')) return 'string';
+      if (['text', 'json'].includes(pgType)) return 'string';
       if (['int', 'integer', 'smallint'].includes(pgType)) return 'int';
       if (
         ['float', 'double precision', 'decimal'].includes(pgType) ||
@@ -189,17 +190,17 @@ module.exports = class extends Generator {
       let position = txt.indexOf(search) + search.length;
       return [txt.slice(0, position), insert, txt.slice(position)].join('');
     }
+    this.log('instrocpecting column types...');
     this.props.tables.forEach(tableNameWithSchema => {
       let tableName = tableNameWithSchema.replace(`${this.props.schema}.`, '');
       let paramCase = changeCase.paramCase(tableName);
       let pascalCase = changeCase.pascalCase(tableName);
-      let titleCase = changeCase.titleCase(tableName);
+      let titleCaseName = titleCase(tableName);
       let snakeCase = changeCase.snakeCase(tableName);
       let table =
         this.props.schema === this.db.currentSchema
           ? this.db[tableName]
           : this.db[this.props.schema][tableName];
-      this.log('instrocpecting column types...');
       this.db
         .query(
           `SELECT
@@ -219,6 +220,7 @@ module.exports = class extends Generator {
         .then(colInfo => {
           if (!colInfo && colInfo.length <= 0) return;
           colInfo.forEach(ci => {
+            ci.columnNameSnakeCase = changeCase.snakeCase(ci.columnName);
             ci.sqlAlchemyType = pgToSQLAlchemyType(ci.dataType);
             if (
               ci.sqlAlchemyType &&
@@ -238,7 +240,7 @@ module.exports = class extends Generator {
             tableName: tableName,
             paramCase: paramCase,
             pascalCase: pascalCase,
-            titleCase: titleCase,
+            titleCase: titleCaseName,
             snakeCase: snakeCase,
             columns: colInfo ? colInfo : [],
             pk: table ? table.pk : []
@@ -318,7 +320,7 @@ module.exports = class extends Generator {
               );
             }
 
-            if (appPy.indexOf('@jwt.user_claims_loader') === -1) {
+            if (appPy.indexOf('@jwt.additional_claims_loader') === -1) {
               appPy = insertAfter(
                 appPy,
                 'blacklist = set()',
