@@ -81,7 +81,8 @@ blacklist = set()
 @jwt.token_in_blocklist_loader
 def check_if_token_in_blacklist(jwt_header, jwt_payload:dict):
     jti = jwt_payload['jti']
-    # TODO: Replace this with a centralized cache service (Redis, Mongo, a database, etc.) return jti in blacklist
+    # TODO: Replace this with a centralized cache service (Redis, Mongo, a database, etc.)
+    return jti in blacklist
 
 
 ######################
