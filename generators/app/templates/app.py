@@ -26,7 +26,7 @@ app.json_decoder = JSONDecoder
 
 
 @app.errorhandler(404)
-def handle_auth_error(e):
+def handle_404_error(e):
     return jsonify({
         "description": "You seem lost...",
         'error': 'resource_not_found'
@@ -34,7 +34,7 @@ def handle_auth_error(e):
 
 
 @app.errorhandler(400)
-def handle_auth_error(e):
+def handle_400_error(e):
     return jsonify({
         "description": "I don't understand this, please send it right.. appreciated!",
         'error': 'bad_request'
