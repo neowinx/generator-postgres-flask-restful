@@ -4,7 +4,7 @@ const os = require('os');
 const chalk = require('chalk');
 const yosay = require('yosay');
 const changeCase = require('change-case');
-const { titleCase } = require("title-case");
+const { titleCase } = require('title-case');
 const ejs = require('ejs');
 const Rx = require('rxjs');
 const inquirer = require('inquirer');
@@ -40,7 +40,7 @@ module.exports = class extends Generator {
         type: 'input',
         name: 'database',
         message: 'Ingrese el nombre de la base de datos',
-        default: 'postgres'
+        default: 'avalon'
       },
       {
         type: 'input',
@@ -81,6 +81,7 @@ module.exports = class extends Generator {
       } else if (answer.name === 'tables') {
         prompts.complete();
       }
+
       if (i < questions.length) {
         prompts.next(questions[i++]);
       } else {
@@ -90,6 +91,7 @@ module.exports = class extends Generator {
           opts.excludeFunctions = true;
           massiveInst = massive(opts, { allowedSchemas: prmp.ui.answers.schema });
         }
+
         massiveInst
           .then(db => {
             this.log('connected.', db);
@@ -131,6 +133,7 @@ module.exports = class extends Generator {
         promptSuggestion.storeAnswers(this._globalConfig, questions, ansprops, false);
         promptSuggestion.storeAnswers(this.config, questions, ansprops, true);
       }
+
       this.props = props;
     });
   }
@@ -150,6 +153,7 @@ module.exports = class extends Generator {
       if (pgType === 'bytea') return 'LargeBinary';
       if (pgType.startsWith('timestamp')) return 'DateTime';
     }
+
     function pgToPythonType(pgType) {
       if (pgType.startsWith('character varying')) return 'str';
       if (pgType.startsWith('character')) return 'str';
@@ -166,6 +170,7 @@ module.exports = class extends Generator {
       if (pgType === 'bytea') return 'bytearray';
       if (pgType.startsWith('timestamp')) return 'datetime';
     }
+
     function pgToSwaggType(pgType) {
       if (pgType.startsWith('character varying')) return 'string';
       if (pgType.startsWith('character')) return 'string';
@@ -182,14 +187,17 @@ module.exports = class extends Generator {
       if (pgType === 'bytea') return 'byte';
       if (pgType.startsWith('timestamp')) return 'datetime';
     }
+
     function insertBefore(txt, search, insert) {
       let position = txt.indexOf(search);
       return [txt.slice(0, position), insert, txt.slice(position)].join('');
     }
+
     function insertAfter(txt, search, insert) {
       let position = txt.indexOf(search) + search.length;
       return [txt.slice(0, position), insert, txt.slice(position)].join('');
     }
+
     this.log('instrocpecting column types...');
     this.props.tables.forEach(tableNameWithSchema => {
       let tableName = tableNameWithSchema.replace(`${this.props.schema}.`, '');
@@ -232,6 +240,7 @@ module.exports = class extends Generator {
                 ci.sqlAlchemyType.indexOf(')')
               );
             }
+
             ci.swaggerType = pgToSwaggType(ci.dataType);
             ci.pythonType = pgToPythonType(ci.dataType);
           });
@@ -243,7 +252,8 @@ module.exports = class extends Generator {
             titleCase: titleCaseName,
             snakeCase: snakeCase,
             columns: colInfo ? colInfo : [],
-            pk: table ? table.pk : []
+            pk: table ? table.pk : [],
+            fks: table ? table.fks : []
           };
           this.fs.copyTpl(
             this.templatePath('model.py'),
@@ -307,6 +317,7 @@ module.exports = class extends Generator {
                 let dbURLAfter = appPy.substring(dbURLEnd);
                 appPy = dbURLBefore + `SQLALCHEMY_DATABASE_URI', '${dbURL}'` + dbURLAfter;
               }
+
               this.dbURLChanged = true;
             }
 
