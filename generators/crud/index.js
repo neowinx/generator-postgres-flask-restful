@@ -245,12 +245,27 @@ module.exports = class extends Generator {
             ci.pythonType = pgToPythonType(ci.dataType);
 
             // Foreign keys info processing
-            const fks = table.fks.filter(fk => fk.dependent_columns.includes(ci.columnName))
+            const fks = table.fks.filter(fk =>
+              fk.dependent_columns.includes(ci.columnName)
+            );
 
-            // This template only generates foreign key info for single dependant columns
-            const fkss = fks.filter(fk => fk.dependent_columns.length === 1)
-            if(fkss.length > 0) {
-              ci.fkInfo = fkss[0]
+            // This generator only generates foreign key info for single dependant and
+            // origin columns
+            const fkss = fks.filter(
+              fk => fk.dependent_columns.length === 1 && fk.origin_columns.length === 1
+            );
+            if (fkss.length > 0) {
+              // Exract the dependent column and cases for it
+              ci.fkInfo = {
+                dependentColumn: fkss[0].dependent_columns[0],
+                originColumn: fkss[0].origin_columns[0],
+                originName: fkss[0].origin_name,
+                originSchema: fkss[0].origin_schema
+              };
+              ci.fkInfo.originNamePascalCase = changeCase.pascalCase(
+                ci.fkInfo.originName
+              );
+              ci.fkInfo.originNameSnakeCase = changeCase.snakeCase(ci.fkInfo.originName);
             }
           });
           let templateData = {
@@ -261,8 +276,7 @@ module.exports = class extends Generator {
             titleCase: titleCaseName,
             snakeCase: snakeCase,
             columns: colInfo ? colInfo : [],
-            pk: table ? table.pk : [],
-            fks: table ? table.fks : []
+            pk: table ? table.pk : []
           };
           this.fs.copyTpl(
             this.templatePath('model.py'),
@@ -307,12 +321,23 @@ module.exports = class extends Generator {
 
           if (this.fs.exists(this.destinationPath('app.py'))) {
             var appPy = this.fs.read(this.destinationPath('app.py'));
+
+            if (!appPy.indexOf(`api.add_resource(${pascalCase}List,`)) {
+              let appendResourceApp = this.fs.read(
+                this.templatePath('append_resource_app.py')
+              );
+              if (appPy.indexOf(`if __name__ == '__main__'`) > -1) {
+                appPy = insertBefore(
+                  appPy,
+                  `if __name__ == '__main__'`,
+                  appendResourceApp
+                );
+              }
+            }
+
             let importsApp = this.fs.read(this.templatePath('imports_app.py'));
             let permisionsAppPy = this.fs.read(
               this.templatePath('permisions_app_py.ejs')
-            );
-            let appendResourceApp = this.fs.read(
-              this.templatePath('append_resource_app.py')
             );
 
             if (!this.dbURLChanged) {
@@ -346,10 +371,6 @@ module.exports = class extends Generator {
                 'blacklist = set()',
                 this.fs.read(this.templatePath('claim_loader_app_py.ejs'))
               );
-            }
-
-            if (appPy.indexOf(`if __name__ == '__main__'`) > -1) {
-              appPy = insertBefore(appPy, `if __name__ == '__main__'`, appendResourceApp);
             }
 
             this.fs.write(

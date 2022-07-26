@@ -3,6 +3,13 @@ import base64
 from flask_restful.reqparse import Namespace
 
 from db import db
+<%_ var alreadyAdded = [] -%>
+<%_ columns.filter(col => col.fkInfo).forEach(col => { -%>
+    <%_ if(!alreadyAdded.includes(col.fkInfo.originName)) { -%>
+from models.<%= col.fkInfo.originNameSnakeCase %> import <%= col.fkInfo.originNamePascalCase %>Model
+        <%_ alreadyAdded.push(col.fkInfo.originName) -%>
+    <%_ } -%>
+<%_ }) -%>
 from utils import _assign_if_something
 
 
@@ -16,10 +23,18 @@ class <%=pascalCase%>Model(db.Model):
     <%_   if(pk.includes(col.columnName)) { -%>
     <%=col.columnNameSnakeCase%> = db.Column(db.<%=col.sqlAlchemyType%>, primary_key=True)
     <%_   } else if(col.fkInfo) { -%>
-    <%=col.columnNameSnakeCase%> = db.Column(db.<%=col.sqlAlchemyType%>, db.ForeignKey(<%= fkInfo.origin_name %>Model.id))
+    <%=col.columnNameSnakeCase%> = db.Column(db.<%=col.sqlAlchemyType%>, db.ForeignKey(<%= col.fkInfo.originNamePascalCase %>Model.<%= col.fkInfo.originColumn %>))
     <%_   } else { -%>
     <%=col.columnNameSnakeCase%> = db.Column(db.<%=col.sqlAlchemyType%>)
     <%_   } -%>
+    <%_ }) -%>
+
+    <%_ var alreadyAdded = [] -%>
+    <%_ columns.filter(col => col.fkInfo).forEach(col => { -%>
+        <%_ if(!alreadyAdded.includes(col.fkInfo.originName)) { -%>
+    <%= col.fkInfo.originNameSnakeCase %> = db.relationship('<%= col.fkInfo.originNamePascalCase %>Model', uselist=False)
+            <%_ alreadyAdded.push(col.fkInfo.originName) -%>
+        <%_ } -%>
     <%_ }) -%>
 
     <%_ if(columns.length > 0) {
@@ -31,8 +46,8 @@ class <%=pascalCase%>Model(db.Model):
     <%_ } -%>
 
     def json(self, jsondepth=0):
-        return {
-    <%_ columns.forEach(col => { -%>
+        json = {
+    <%_ columns.filter(col => !col.fkInfo).forEach(col => { -%>
         <%_ if(col.pythonType === 'bytearray') { -%>
             '<%=col.columnNameSnakeCase%>': base64.b64encode(self.<%=col.columnNameSnakeCase%>).decode() if self.<%=col.columnNameSnakeCase%> else None,
         <%_ } else { -%>
@@ -40,6 +55,18 @@ class <%=pascalCase%>Model(db.Model):
         <%_ } -%>
     <%_})-%>
         }
+
+        <%_ var alreadyAdded = [] -%>
+        <%_ columns.filter(col => col.fkInfo).forEach(col => { -%>
+            <%_ if(!alreadyAdded.includes(col.fkInfo.originName)) { -%>
+        if jsondepth > 0:
+            if self.<%= col.fkInfo.originName %>:
+                json['<%= col.fkInfo.originName %>'] = self.<%= col.fkInfo.originName %>.json(jsondepth)
+
+                <%_ alreadyAdded.push(col.fkInfo.originName) -%>
+            <%_ } -%>
+        <%_ }) -%>
+        return json
 
     <%_ if(columns.length > 0) {
         firstColumn = columns[0].columnNameSnakeCase -%>
