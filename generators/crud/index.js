@@ -243,6 +243,15 @@ module.exports = class extends Generator {
 
             ci.swaggerType = pgToSwaggType(ci.dataType);
             ci.pythonType = pgToPythonType(ci.dataType);
+
+            // Foreign keys info processing
+            const fks = table.fks.filter(fk => fk.dependent_columns.includes(ci.columnName))
+
+            // This template only generates foreign key info for single dependant columns
+            const fkss = fks.filter(fk => fk.dependent_columns.length === 1)
+            if(fkss.length > 0) {
+              ci.fkInfo = fkss[0]
+            }
           });
           let templateData = {
             schemaName: this.props.schema,

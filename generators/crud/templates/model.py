@@ -15,6 +15,8 @@ class <%=pascalCase%>Model(db.Model):
     <%_ columns.forEach(col => { -%>
     <%_   if(pk.includes(col.columnName)) { -%>
     <%=col.columnNameSnakeCase%> = db.Column(db.<%=col.sqlAlchemyType%>, primary_key=True)
+    <%_   } else if(col.fkInfo) { -%>
+    <%=col.columnNameSnakeCase%> = db.Column(db.<%=col.sqlAlchemyType%>, db.ForeignKey(<%= fkInfo.origin_name %>Model.id))
     <%_   } else { -%>
     <%=col.columnNameSnakeCase%> = db.Column(db.<%=col.sqlAlchemyType%>)
     <%_   } -%>
