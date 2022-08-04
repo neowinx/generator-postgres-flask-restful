@@ -249,7 +249,7 @@ module.exports = class extends Generator {
               fk.dependent_columns.includes(ci.columnName)
             );
 
-            // This generator only generates foreign key info for single dependant and
+            // This generator only generates foreign key info for single dependent and
             // origin columns
             const fkss = fks.filter(
               fk => fk.dependent_columns.length === 1 && fk.origin_columns.length === 1
@@ -266,6 +266,9 @@ module.exports = class extends Generator {
                 ci.fkInfo.originName
               );
               ci.fkInfo.originNameSnakeCase = changeCase.snakeCase(ci.fkInfo.originName);
+              ci.fkInfo.dependentColumnSnakeCase = changeCase.snakeCase(
+                ci.fkInfo.dependentColumn
+              );
             }
           });
           let templateData = {

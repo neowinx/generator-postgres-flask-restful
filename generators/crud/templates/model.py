@@ -32,7 +32,7 @@ class <%=pascalCase%>Model(db.Model):
     <%_ var alreadyAdded = [] -%>
     <%_ columns.filter(col => col.fkInfo).forEach(col => { -%>
         <%_ if(!alreadyAdded.includes(col.fkInfo.originName)) { -%>
-    <%= col.fkInfo.originNameSnakeCase %> = db.relationship('<%= col.fkInfo.originNamePascalCase %>Model', uselist=False)
+    <%= col.fkInfo.originNameSnakeCase %> = db.relationship('<%= col.fkInfo.originNamePascalCase %>Model', foreign_keys=[<%= col.fkInfo.dependentColumnSnakeCase %>], uselist=False)
             <%_ alreadyAdded.push(col.fkInfo.originName) -%>
         <%_ } -%>
     <%_ }) -%>
