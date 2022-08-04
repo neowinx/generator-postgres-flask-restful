@@ -43,7 +43,7 @@ class <%=pascalCase%>(Resource):
         <%=snakeCase%> = <%=pascalCase%>Model.find_by_id(id)
         if <%=snakeCase%>:
             newdata = <%=pascalCase%>.parser.parse_args()
-            <%=snakeCase%>.from_reqparse(newdata)
+            <%=pascalCase%>Model.from_reqparse(newdata)
             <%=snakeCase%>.save_to_db()
             return <%=snakeCase%>.json()
         return {'message': 'No se encuentra <%=titleCase%>'}, 404
