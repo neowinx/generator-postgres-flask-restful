@@ -4,7 +4,7 @@ const os = require('os');
 const chalk = require('chalk');
 const yosay = require('yosay');
 const changeCase = require('change-case');
-const { titleCase } = require("title-case");
+const { titleCase } = require('title-case');
 const ejs = require('ejs');
 const Rx = require('rxjs');
 const inquirer = require('inquirer');
@@ -40,7 +40,7 @@ module.exports = class extends Generator {
         type: 'input',
         name: 'database',
         message: 'Ingrese el nombre de la base de datos',
-        default: 'postgres'
+        default: 'avalon'
       },
       {
         type: 'input',
@@ -81,6 +81,7 @@ module.exports = class extends Generator {
       } else if (answer.name === 'tables') {
         prompts.complete();
       }
+
       if (i < questions.length) {
         prompts.next(questions[i++]);
       } else {
@@ -90,6 +91,7 @@ module.exports = class extends Generator {
           opts.excludeFunctions = true;
           massiveInst = massive(opts, { allowedSchemas: prmp.ui.answers.schema });
         }
+
         massiveInst
           .then(db => {
             this.log('connected.', db);
@@ -131,6 +133,7 @@ module.exports = class extends Generator {
         promptSuggestion.storeAnswers(this._globalConfig, questions, ansprops, false);
         promptSuggestion.storeAnswers(this.config, questions, ansprops, true);
       }
+
       this.props = props;
     });
   }
@@ -150,6 +153,7 @@ module.exports = class extends Generator {
       if (pgType === 'bytea') return 'LargeBinary';
       if (pgType.startsWith('timestamp')) return 'DateTime';
     }
+
     function pgToPythonType(pgType) {
       if (pgType.startsWith('character varying')) return 'str';
       if (pgType.startsWith('character')) return 'str';
@@ -166,6 +170,7 @@ module.exports = class extends Generator {
       if (pgType === 'bytea') return 'bytearray';
       if (pgType.startsWith('timestamp')) return 'datetime';
     }
+
     function pgToSwaggType(pgType) {
       if (pgType.startsWith('character varying')) return 'string';
       if (pgType.startsWith('character')) return 'string';
@@ -182,14 +187,17 @@ module.exports = class extends Generator {
       if (pgType === 'bytea') return 'byte';
       if (pgType.startsWith('timestamp')) return 'datetime';
     }
+
     function insertBefore(txt, search, insert) {
       let position = txt.indexOf(search);
       return [txt.slice(0, position), insert, txt.slice(position)].join('');
     }
+
     function insertAfter(txt, search, insert) {
       let position = txt.indexOf(search) + search.length;
       return [txt.slice(0, position), insert, txt.slice(position)].join('');
     }
+
     this.log('instrocpecting column types...');
     this.props.tables.forEach(tableNameWithSchema => {
       let tableName = tableNameWithSchema.replace(`${this.props.schema}.`, '');
@@ -232,8 +240,39 @@ module.exports = class extends Generator {
                 ci.sqlAlchemyType.indexOf(')')
               );
             }
+
             ci.swaggerType = pgToSwaggType(ci.dataType);
             ci.pythonType = pgToPythonType(ci.dataType);
+
+            // Foreign keys info processing
+            const fks = table.fks.filter(fk =>
+              fk.dependent_columns.includes(ci.columnName)
+            );
+
+            // This generator only generates foreign key info for single dependent and
+            // origin columns
+            const fkss = fks.filter(
+              fk => fk.dependent_columns.length === 1 && fk.origin_columns.length === 1
+            );
+            if (fkss.length > 0) {
+              // Exract the dependent column and cases for it
+              ci.fkInfo = {
+                dependentColumn: fkss[0].dependent_columns[0],
+                originColumn: fkss[0].origin_columns[0],
+                originName: fkss[0].origin_name,
+                originSchema: fkss[0].origin_schema
+              };
+              ci.fkInfo.originNamePascalCase = changeCase.pascalCase(
+                ci.fkInfo.originName
+              );
+              ci.fkInfo.originNameSnakeCase = changeCase.snakeCase(ci.fkInfo.originName);
+              ci.fkInfo.dependentColumnSnakeCase = changeCase.snakeCase(
+                ci.fkInfo.dependentColumn
+              );
+              ci.fkInfo.hasSiblings =
+                table.fks.filter(fk => fk.origin_name === ci.fkInfo.originName).length >
+                1;
+            }
           });
           let templateData = {
             schemaName: this.props.schema,
@@ -288,12 +327,23 @@ module.exports = class extends Generator {
 
           if (this.fs.exists(this.destinationPath('app.py'))) {
             var appPy = this.fs.read(this.destinationPath('app.py'));
+
+            if (!appPy.indexOf(`api.add_resource(${pascalCase}List,`)) {
+              let appendResourceApp = this.fs.read(
+                this.templatePath('append_resource_app.py')
+              );
+              if (appPy.indexOf(`if __name__ == '__main__'`) > -1) {
+                appPy = insertBefore(
+                  appPy,
+                  `if __name__ == '__main__'`,
+                  appendResourceApp
+                );
+              }
+            }
+
             let importsApp = this.fs.read(this.templatePath('imports_app.py'));
             let permisionsAppPy = this.fs.read(
               this.templatePath('permisions_app_py.ejs')
-            );
-            let appendResourceApp = this.fs.read(
-              this.templatePath('append_resource_app.py')
             );
 
             if (!this.dbURLChanged) {
@@ -307,6 +357,7 @@ module.exports = class extends Generator {
                 let dbURLAfter = appPy.substring(dbURLEnd);
                 appPy = dbURLBefore + `SQLALCHEMY_DATABASE_URI', '${dbURL}'` + dbURLAfter;
               }
+
               this.dbURLChanged = true;
             }
 
@@ -326,10 +377,6 @@ module.exports = class extends Generator {
                 'blacklist = set()',
                 this.fs.read(this.templatePath('claim_loader_app_py.ejs'))
               );
-            }
-
-            if (appPy.indexOf(`if __name__ == '__main__'`) > -1) {
-              appPy = insertBefore(appPy, `if __name__ == '__main__'`, appendResourceApp);
             }
 
             this.fs.write(
