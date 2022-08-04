@@ -29,12 +29,14 @@ class <%=pascalCase%>Model(db.Model):
     <%_   } -%>
     <%_ }) -%>
 
-    <%_ var alreadyAdded = [] -%>
     <%_ columns.filter(col => col.fkInfo).forEach(col => { -%>
-        <%_ if(!alreadyAdded.includes(col.fkInfo.originName)) { -%>
-    <%= col.fkInfo.originNameSnakeCase %> = db.relationship('<%= col.fkInfo.originNamePascalCase %>Model', foreign_keys=[<%= col.fkInfo.dependentColumnSnakeCase %>], uselist=False)
-            <%_ alreadyAdded.push(col.fkInfo.originName) -%>
+        <%_ let attrName -%>
+        <%_ if(col.fkInfo.hasSiblings) { -%>
+            <%_ attrName = `${col.fkInfo.dependentColumnSnakeCase}_${col.fkInfo.originNameSnakeCase}` -%>
+        <%_ } else { -%>
+            <%_ attrName = col.fkInfo.originNameSnakeCase -%>
         <%_ } -%>
+    <%= attrName %> = db.relationship('<%= col.fkInfo.originNamePascalCase %>Model', foreign_keys=[<%= col.fkInfo.dependentColumnSnakeCase %>], uselist=False)
     <%_ }) -%>
 
     <%_ if(columns.length > 0) {
@@ -56,15 +58,17 @@ class <%=pascalCase%>Model(db.Model):
     <%_})-%>
         }
 
-        <%_ var alreadyAdded = [] -%>
         <%_ columns.filter(col => col.fkInfo).forEach(col => { -%>
-            <%_ if(!alreadyAdded.includes(col.fkInfo.originName)) { -%>
         if jsondepth > 0:
-            if self.<%= col.fkInfo.originName %>:
-                json['<%= col.fkInfo.originName %>'] = self.<%= col.fkInfo.originName %>.json(jsondepth)
-
-                <%_ alreadyAdded.push(col.fkInfo.originName) -%>
+            <%_ let attrName -%>
+            <%_ if(col.fkInfo.hasSiblings) { -%>
+                <%_ attrName = `${col.fkInfo.dependentColumnSnakeCase}_${col.fkInfo.originNameSnakeCase}` -%>
+            <%_ } else { -%>
+                <%_ attrName = col.fkInfo.originNameSnakeCase -%>
             <%_ } -%>
+            if self.<%= attrName %>:
+                json['<%= attrName %>'] = self.<%= attrName %>.json(jsondepth - 1)
+
         <%_ }) -%>
         return json
 

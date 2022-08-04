@@ -269,6 +269,9 @@ module.exports = class extends Generator {
               ci.fkInfo.dependentColumnSnakeCase = changeCase.snakeCase(
                 ci.fkInfo.dependentColumn
               );
+              ci.fkInfo.hasSiblings =
+                table.fks.filter(fk => fk.origin_name === ci.fkInfo.originName).length >
+                1;
             }
           });
           let templateData = {
