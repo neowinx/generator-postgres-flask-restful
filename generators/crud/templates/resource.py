@@ -40,13 +40,13 @@ class <%=pascalCase%>(Resource):
     @check('<%=snakeCase%>_update')
     @swag_from('../swagger/<%=snakeCase%>/put_<%=snakeCase%>.yaml')
     def put(self, id):
-        <%=snakeCase%> = <%=pascalCase%>Model.find_by_id(id)
-        if <%=snakeCase%>:
-            newdata = <%=pascalCase%>.parser.parse_args()
-            <%=pascalCase%>Model.from_reqparse(self, newdata)
-            <%=snakeCase%>.save_to_db()
-            return <%=snakeCase%>.json()
-        return {'message': 'No se encuentra <%=titleCase%>'}, 404
+        <%= snakeCase %> = <%= pascalCase %>Model.find_by_id(id)
+        if <%= snakeCase %>:
+            newdata = <%= pascalCase %>.parser.parse_args()
+            <%= pascalCase %>Model.from_reqparse(<%= snakeCase %>, newdata)
+            <%= snakeCase %>.save_to_db()
+            return <%= snakeCase %>.json()
+        return {'message': 'No se encuentra <%= titleCase %>'}, 404
 
     @jwt_required()
     @check('<%=snakeCase%>_delete')
