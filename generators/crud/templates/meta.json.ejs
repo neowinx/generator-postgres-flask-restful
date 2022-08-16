@@ -1,0 +1,45 @@
+{
+  "icon": "chevron_right",
+  "main_title": null,
+  "titles": {
+  },
+  "no_list": [
+  <%_ let pkColumns = columns.filter(col => pk.includes(col.columnName)) -%>
+  <%_ pkColumns.forEach((col, index) => { -%>
+    "<%= col.columnNameSnakeCase %>"<% if (index !== pkColumns.length - 1) {%>,<%_}%>
+  <%_ }) -%>
+  ],
+  "no_edit": [
+  <%_ pkColumns.forEach((col, index) => { -%>
+    "<%= col.columnNameSnakeCase %>"<% if (index !== pkColumns.length - 1) {%>,<%_}%>
+  <%_ }) -%>
+  ],
+  <%_ let dateColumns = columns.filter(col => col.pythonType === 'date') -%>
+  <%_ if (dateColumns.length > 0) { -%>
+  "date_fields": [
+    <%_ dateColumns.forEach((col, index) => { -%>
+    "<%= col.columnNameSnakeCase %>"<% if (index !== dateColumns.length - 1) {%>,<%_}%>
+    <%_ }) -%>
+  ],
+  <%_ } -%>
+  "currency_fields": [ ],
+  "image_fields": [ ]<%_ let fkCols = columns.filter(col => col.fkInfo) -%>
+  <%_ if (fkCols.length > 0) { -%>,
+  "relations": { 
+    <%_ fkCols.forEach((col, index) => { -%>
+      <%_ let attrName -%>
+      <%_ if(col.fkInfo.hasSiblings) { -%>
+          <%_ attrName = `${col.fkInfo.dependentColumnSnakeCase}_${col.fkInfo.originNameSnakeCase}` -%>
+      <%_ } else { -%>
+          <%_ attrName = col.fkInfo.originNameSnakeCase -%>
+      <%_ } -%>
+    "<%= attrName %>": {
+      "dependent_attr": "<%= col.fkInfo.dependentColumnSnakeCase %>",
+      "origin_attr": "<%= col.fkInfo.originColumnSnakeCase %>",
+      "origin_model": "<%= col.fkInfo.originNameSnakeCase %>",
+      "label_attr": "<%= col.fkInfo.labelAttr %>"
+    }<% if (index !== fkCols.length - 1) {%>,<%_}%>
+    <%_ }) -%>
+  }
+  <%_ } -%>
+}

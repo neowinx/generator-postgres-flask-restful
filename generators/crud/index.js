@@ -138,7 +138,7 @@ module.exports = class extends Generator {
     });
   }
 
-  writing() {
+  async writing() {
     function pgToSQLAlchemyType(pgType) {
       if (pgType.startsWith('character varying'))
         return pgType.replace('character varying', 'String');
@@ -198,20 +198,8 @@ module.exports = class extends Generator {
       return [txt.slice(0, position), insert, txt.slice(position)].join('');
     }
 
-    this.log('instrocpecting column types...');
-    this.props.tables.forEach(tableNameWithSchema => {
-      let tableName = tableNameWithSchema.replace(`${this.props.schema}.`, '');
-      let paramCase = changeCase.paramCase(tableName);
-      let pascalCase = changeCase.pascalCase(tableName);
-      let titleCaseName = titleCase(tableName);
-      let snakeCase = changeCase.snakeCase(tableName);
-      let table =
-        this.props.schema === this.db.currentSchema
-          ? this.db[tableName]
-          : this.db[this.props.schema][tableName];
-      this.db
-        .query(
-          `SELECT
+    function columnInfoQuery(table, schema) {
+      return `SELECT
           a.attname                                       as "columnName",
           pg_catalog.format_type(a.atttypid, a.atttypmod) as "dataType"
         FROM
@@ -223,168 +211,171 @@ module.exports = class extends Generator {
             SELECT c.oid
             FROM pg_catalog.pg_class c
               LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
-            WHERE c.relname ~ '^(${tableName})$' AND n.nspname = '${this.props.schema}');`
-        )
-        .then(colInfo => {
-          if (!colInfo && colInfo.length <= 0) return;
-          colInfo.forEach(ci => {
-            ci.columnNameSnakeCase = changeCase.snakeCase(ci.columnName);
-            ci.sqlAlchemyType = pgToSQLAlchemyType(ci.dataType);
-            if (
-              ci.sqlAlchemyType &&
-              ci.sqlAlchemyType.startsWith('String') &&
-              ci.sqlAlchemyType.indexOf('(') > -1
-            ) {
-              ci.stringTypeLength = ci.sqlAlchemyType.substring(
-                ci.sqlAlchemyType.indexOf('(') + 1,
-                ci.sqlAlchemyType.indexOf(')')
-              );
-            }
+            WHERE c.relname ~ '^(${table})$' AND n.nspname = '${schema}');`;
+    }
 
-            ci.swaggerType = pgToSwaggType(ci.dataType);
-            ci.pythonType = pgToPythonType(ci.dataType);
+    this.log('instrocpecting column types...');
 
-            // Foreign keys info processing
-            const fks = table.fks.filter(fk =>
-              fk.dependent_columns.includes(ci.columnName)
-            );
+    for (const tableNameWithSchema of this.props.tables) {
+      let tableName = tableNameWithSchema.replace(`${this.props.schema}.`, '');
+      let paramCase = changeCase.paramCase(tableName);
+      let pascalCase = changeCase.pascalCase(tableName);
+      let titleCaseName = titleCase(tableName);
 
-            // This generator only generates foreign key info for single dependent and
-            // origin columns
-            const fkss = fks.filter(
-              fk => fk.dependent_columns.length === 1 && fk.origin_columns.length === 1
-            );
-            if (fkss.length > 0) {
-              // Exract the dependent column and cases for it
-              ci.fkInfo = {
-                dependentColumn: fkss[0].dependent_columns[0],
-                originColumn: fkss[0].origin_columns[0],
-                originName: fkss[0].origin_name,
-                originSchema: fkss[0].origin_schema
-              };
-              ci.fkInfo.originNamePascalCase = changeCase.pascalCase(
-                ci.fkInfo.originName
-              );
-              ci.fkInfo.originNameSnakeCase = changeCase.snakeCase(ci.fkInfo.originName);
-              ci.fkInfo.dependentColumnSnakeCase = changeCase.snakeCase(
-                ci.fkInfo.dependentColumn
-              );
-              ci.fkInfo.hasSiblings =
-                table.fks.filter(fk => fk.origin_name === ci.fkInfo.originName).length >
-                1;
-            }
+      let snakeCase = changeCase.snakeCase(tableName);
+      let table =
+        this.props.schema === this.db.currentSchema
+          ? this.db[tableName]
+          : this.db[this.props.schema][tableName];
+
+      const colInfo = await this.db.query(columnInfoQuery(tableName, this.props.schema));
+
+      if (!colInfo && colInfo.length <= 0) return;
+
+      for (const ci of colInfo) {
+        ci.columnNameSnakeCase = changeCase.snakeCase(ci.columnName);
+        ci.sqlAlchemyType = pgToSQLAlchemyType(ci.dataType);
+        if (
+          ci.sqlAlchemyType &&
+          ci.sqlAlchemyType.startsWith('String') &&
+          ci.sqlAlchemyType.indexOf('(') > -1
+        ) {
+          ci.stringTypeLength = ci.sqlAlchemyType.substring(
+            ci.sqlAlchemyType.indexOf('(') + 1,
+            ci.sqlAlchemyType.indexOf(')')
+          );
+        }
+
+        ci.swaggerType = pgToSwaggType(ci.dataType);
+        ci.pythonType = pgToPythonType(ci.dataType);
+
+        // Foreign keys info processing
+        const fks = table.fks.filter(fk => fk.dependent_columns.includes(ci.columnName));
+
+        // This generator only generates foreign key info for single dependent and
+        // origin columns
+        const fkss = fks.filter(
+          fk => fk.dependent_columns.length === 1 && fk.origin_columns.length === 1
+        );
+        if (fkss.length > 0) {
+          // Exract the dependent column and cases for it
+          const originTable = this.db[fkss[0].origin_name];
+          const originColumnInfo = await this.db.query(
+            columnInfoQuery(originTable.name, fkss[0].origin_schema)
+          );
+          originTable.columns.forEach(c => {
+            const maybeDt = originColumnInfo.filter(cd => cd.columnName === c.name);
+            c.dataType = maybeDt.length > 0 ? maybeDt[0].dataType : null;
           });
-          let templateData = {
-            schemaName: this.props.schema,
-            tableName: tableName,
-            paramCase: paramCase,
-            pascalCase: pascalCase,
-            titleCase: titleCaseName,
-            snakeCase: snakeCase,
-            columns: colInfo ? colInfo : [],
-            pk: table ? table.pk : []
+
+          const maybeLabels = originTable.columns
+            .filter(
+              c =>
+                !originTable.pk.includes(c.name) && pgToPythonType(c.dataType) === 'str'
+            )
+            .map(c => c.name);
+          ci.fkInfo = {
+            dependentColumn: fkss[0].dependent_columns[0],
+            originColumn: fkss[0].origin_columns[0],
+            originName: fkss[0].origin_name,
+            originSchema: fkss[0].origin_schema,
+            labelAttr: maybeLabels.length > 0 ? maybeLabels[0] : null
           };
-          this.fs.copyTpl(
-            this.templatePath('model.py'),
-            this.destinationPath(`models/${snakeCase}.py`),
-            templateData
+          ci.fkInfo.originColumnSnakeCase = changeCase.snakeCase(ci.fkInfo.originColumn);
+          ci.fkInfo.originNamePascalCase = changeCase.pascalCase(ci.fkInfo.originName);
+          ci.fkInfo.originNameSnakeCase = changeCase.snakeCase(ci.fkInfo.originName);
+          ci.fkInfo.dependentColumnSnakeCase = changeCase.snakeCase(
+            ci.fkInfo.dependentColumn
           );
-          this.fs.copyTpl(
-            this.templatePath('resource.py'),
-            this.destinationPath(`resources/${snakeCase}.py`),
-            templateData
+          ci.fkInfo.hasSiblings =
+            table.fks.filter(fk => fk.origin_name === ci.fkInfo.originName).length > 1;
+        }
+      }
+
+      let templateData = {
+        schemaName: this.props.schema,
+        tableName: tableName,
+        paramCase: paramCase,
+        pascalCase: pascalCase,
+        titleCase: titleCaseName,
+        snakeCase: snakeCase,
+        columns: colInfo ? colInfo : [],
+        pk: table ? table.pk : []
+      };
+
+      const temps = [
+        { src: 'model.py', dest: `models/${snakeCase}.py` },
+        { src: 'resource.py', dest: `resources/${snakeCase}.py` },
+        { src: 'list.yaml', dest: `swagger/${snakeCase}/list_${snakeCase}.yaml` },
+        { src: 'get.yaml', dest: `swagger/${snakeCase}/get_${snakeCase}.yaml` },
+        { src: 'post.yaml', dest: `swagger/${snakeCase}/post_${snakeCase}.yaml` },
+        { src: 'put.yaml', dest: `swagger/${snakeCase}/put_${snakeCase}.yaml` },
+        { src: 'delete.yaml', dest: `swagger/${snakeCase}/delete_${snakeCase}.yaml` },
+        { src: 'search.yaml', dest: `swagger/${snakeCase}/search_${snakeCase}.yaml` },
+        { src: 'meta.json.ejs', dest: `generated/${snakeCase}.meta.json` }
+      ];
+
+      for (const tmp of temps) {
+        this.fs.copyTpl(
+          this.templatePath(tmp.src),
+          this.destinationPath(tmp.dest),
+          templateData
+        );
+      }
+
+      if (this.fs.exists(this.destinationPath('app.py'))) {
+        var appPy = this.fs.read(this.destinationPath('app.py'));
+
+        if (!appPy.indexOf(`api.add_resource(${pascalCase}List,`)) {
+          let appendResourceApp = this.fs.read(
+            this.templatePath('append_resource_app.py')
           );
-          this.fs.copyTpl(
-            this.templatePath('list.yaml'),
-            this.destinationPath(`swagger/${snakeCase}/list_${snakeCase}.yaml`),
-            templateData
-          );
-          this.fs.copyTpl(
-            this.templatePath('get.yaml'),
-            this.destinationPath(`swagger/${snakeCase}/get_${snakeCase}.yaml`),
-            templateData
-          );
-          this.fs.copyTpl(
-            this.templatePath('post.yaml'),
-            this.destinationPath(`swagger/${snakeCase}/post_${snakeCase}.yaml`),
-            templateData
-          );
-          this.fs.copyTpl(
-            this.templatePath('put.yaml'),
-            this.destinationPath(`swagger/${snakeCase}/put_${snakeCase}.yaml`),
-            templateData
-          );
-          this.fs.copyTpl(
-            this.templatePath('delete.yaml'),
-            this.destinationPath(`swagger/${snakeCase}/delete_${snakeCase}.yaml`),
-            templateData
-          );
-          this.fs.copyTpl(
-            this.templatePath('search.yaml'),
-            this.destinationPath(`swagger/${snakeCase}/search_${snakeCase}.yaml`),
-            templateData
-          );
-
-          if (this.fs.exists(this.destinationPath('app.py'))) {
-            var appPy = this.fs.read(this.destinationPath('app.py'));
-
-            if (!appPy.indexOf(`api.add_resource(${pascalCase}List,`)) {
-              let appendResourceApp = this.fs.read(
-                this.templatePath('append_resource_app.py')
-              );
-              if (appPy.indexOf(`if __name__ == '__main__'`) > -1) {
-                appPy = insertBefore(
-                  appPy,
-                  `if __name__ == '__main__'`,
-                  appendResourceApp
-                );
-              }
-            }
-
-            let importsApp = this.fs.read(this.templatePath('imports_app.py'));
-            let permisionsAppPy = this.fs.read(
-              this.templatePath('permisions_app_py.ejs')
-            );
-
-            if (!this.dbURLChanged) {
-              let dbURL =
-                `postgresql://${this.props.user}:${this.props.password}` +
-                `@${this.props.host}:${this.props.port}/${this.props.database}`;
-              let dbURLStart = appPy.indexOf('SQLALCHEMY_DATABASE_URI');
-              if (dbURLStart !== -1) {
-                let dbURLEnd = appPy.indexOf(')', dbURLStart);
-                let dbURLBefore = appPy.substring(0, dbURLStart);
-                let dbURLAfter = appPy.substring(dbURLEnd);
-                appPy = dbURLBefore + `SQLALCHEMY_DATABASE_URI', '${dbURL}'` + dbURLAfter;
-              }
-
-              this.dbURLChanged = true;
-            }
-
-            if (appPy.indexOf('permisions = [') > -1) {
-              appPy = insertAfter(appPy, `permisions = [${os.EOL}`, `${permisionsAppPy}`);
-            } else {
-              appPy = insertBefore(
-                appPy,
-                'app = Flask(',
-                `\npermisions = [\n${permisionsAppPy}]\n\n\n`
-              );
-            }
-
-            if (appPy.indexOf('@jwt.additional_claims_loader') === -1) {
-              appPy = insertAfter(
-                appPy,
-                'blacklist = set()',
-                this.fs.read(this.templatePath('claim_loader_app_py.ejs'))
-              );
-            }
-
-            this.fs.write(
-              this.destinationPath('app.py'),
-              ejs.render(importsApp + appPy, templateData)
-            );
+          if (appPy.indexOf(`if __name__ == '__main__'`) > -1) {
+            appPy = insertBefore(appPy, `if __name__ == '__main__'`, appendResourceApp);
           }
-        });
-    });
+        }
+
+        let importsApp = this.fs.read(this.templatePath('imports_app.py'));
+        let permisionsAppPy = this.fs.read(this.templatePath('permisions_app_py.ejs'));
+
+        if (!this.dbURLChanged) {
+          let dbURL =
+            `postgresql://${this.props.user}:${this.props.password}` +
+            `@${this.props.host}:${this.props.port}/${this.props.database}`;
+          let dbURLStart = appPy.indexOf('SQLALCHEMY_DATABASE_URI');
+          if (dbURLStart !== -1) {
+            let dbURLEnd = appPy.indexOf(')', dbURLStart);
+            let dbURLBefore = appPy.substring(0, dbURLStart);
+            let dbURLAfter = appPy.substring(dbURLEnd);
+            appPy = dbURLBefore + `SQLALCHEMY_DATABASE_URI', '${dbURL}'` + dbURLAfter;
+          }
+
+          this.dbURLChanged = true;
+        }
+
+        if (appPy.indexOf('permisions = [') > -1) {
+          appPy = insertAfter(appPy, `permisions = [${os.EOL}`, `${permisionsAppPy}`);
+        } else {
+          appPy = insertBefore(
+            appPy,
+            'app = Flask(',
+            `\npermisions = [\n${permisionsAppPy}]\n\n\n`
+          );
+        }
+
+        if (appPy.indexOf('@jwt.additional_claims_loader') === -1) {
+          appPy = insertAfter(
+            appPy,
+            'blacklist = set()',
+            this.fs.read(this.templatePath('claim_loader_app_py.ejs'))
+          );
+        }
+
+        this.fs.write(
+          this.destinationPath('app.py'),
+          ejs.render(importsApp + appPy, templateData)
+        );
+      }
+    }
   }
 };
