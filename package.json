@@ -36,8 +36,9 @@
   "dependencies": {
     "chalk": "^2.1.0",
     "change-case": "^4.1.2",
-    "title-case": "^3.0.3",
+    "inquirer-checkbox-plus-prompt": "^1.0.1",
     "massive": "^6.10.2",
+    "title-case": "^3.0.3",
     "yeoman-generator": "^3.1.1",
     "yosay": "^2.0.2"
   },

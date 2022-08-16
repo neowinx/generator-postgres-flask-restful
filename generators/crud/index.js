@@ -8,6 +8,7 @@ const { titleCase } = require('title-case');
 const ejs = require('ejs');
 const Rx = require('rxjs');
 const inquirer = require('inquirer');
+inquirer.registerPrompt('checkbox-plus', require('inquirer-checkbox-plus-prompt'));
 const massive = require('massive');
 const promptSuggestion = require('yeoman-generator/lib/util/prompt-suggestion');
 
@@ -102,10 +103,12 @@ module.exports = class extends Generator {
                 : db.listTables().filter(t => t.startsWith(prmp.ui.answers.schema));
             if (tablas.length > 0) {
               prompts.next({
-                type: 'checkbox',
+                type: 'checkbox-plus',
                 name: 'tables',
                 message: 'Seleccione las tablas a generar artefactos',
-                choices: tablas
+                searchable: true,
+                source: async (_, input) =>
+                  tablas.filter(t => t.includes(input ? input : ''))
               });
             } else {
               prompts.complete();
@@ -228,6 +231,7 @@ module.exports = class extends Generator {
           ? this.db[tableName]
           : this.db[this.props.schema][tableName];
 
+      /* eslint-disable no-await-in-loop */
       const colInfo = await this.db.query(columnInfoQuery(tableName, this.props.schema));
 
       if (!colInfo && colInfo.length <= 0) return;
