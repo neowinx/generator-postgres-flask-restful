@@ -359,7 +359,13 @@ module.exports = class extends Generator {
         }
 
         if (appPy.indexOf('permisions = [') > -1) {
-          appPy = insertAfter(appPy, `permisions = [${os.EOL}`, `${permisionsAppPy}`);
+          if (
+            appPy
+              .substring(appPy.indexOf('permisions = ['))
+              .indexOf(`${snakeCase}_search`) === -1
+          ) {
+            appPy = insertAfter(appPy, `permisions = [${os.EOL}`, `${permisionsAppPy}`);
+          }
         } else {
           appPy = insertBefore(
             appPy,
