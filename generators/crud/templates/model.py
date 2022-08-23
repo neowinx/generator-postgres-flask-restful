@@ -20,13 +20,17 @@ class <%=pascalCase%>Model(BaseModel):
     <%_ } -%>
 
     <%_ columns.forEach(col => { -%>
-    <%_   if(pk.includes(col.columnName)) { -%>
-    <%=col.columnNameSnakeCase%> = db.Column(db.<%=col.sqlAlchemyType%>, primary_key=True)
-    <%_   } else if(col.fkInfo) { -%>
-    <%=col.columnNameSnakeCase%> = db.Column(db.<%=col.sqlAlchemyType%>, db.ForeignKey(<%= col.fkInfo.originNamePascalCase %>Model.<%= col.fkInfo.originColumn %>))
-    <%_   } else { -%>
-    <%=col.columnNameSnakeCase%> = db.Column(db.<%=col.sqlAlchemyType%>)
-    <%_   } -%>
+    <%_   var columnExpression = `${col.columnNameSnakeCase} = db.Column(db.${col.sqlAlchemyType}` -%>
+    <%_   if (pk.includes(col.columnName)) { 
+            columnExpression = `${columnExpression}, primary_key=True`
+          }
+          if (col.notNull) { 
+            columnExpression = `${columnExpression}, nullable=False`
+          }
+          if (col.fkInfo) { 
+            columnExpression = `${columnExpression}, db.ForeignKey(${col.fkInfo.originNamePascalCase}Model.${col.fkInfo.originColumnSnakeCase})`
+          }-%>
+    <%= `${columnExpression})` %>
     <%_ }) -%>
 
     <%_ fkCols.forEach(col => { -%>

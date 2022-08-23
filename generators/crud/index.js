@@ -19,7 +19,7 @@ module.exports = class extends Generator {
         'Generador ' +
           chalk.yellow('crud') +
           ' ' +
-          chalk.green('postgresql-flask-vue-coreui') +
+          chalk.green('postgresql-flask-restful') +
           '!'
       )
     );
@@ -204,7 +204,8 @@ module.exports = class extends Generator {
     function columnInfoQuery(table, schema) {
       return `SELECT
           a.attname                                       as "columnName",
-          pg_catalog.format_type(a.atttypid, a.atttypmod) as "dataType"
+          pg_catalog.format_type(a.atttypid, a.atttypmod) as "dataType",
+          a.attnotnull                                    as "notNull"
         FROM
           pg_catalog.pg_attribute a
         WHERE
@@ -316,7 +317,7 @@ module.exports = class extends Generator {
         { src: 'put.yaml', dest: `swagger/${snakeCase}/put_${snakeCase}.yaml` },
         { src: 'delete.yaml', dest: `swagger/${snakeCase}/delete_${snakeCase}.yaml` },
         { src: 'search.yaml', dest: `swagger/${snakeCase}/search_${snakeCase}.yaml` },
-        { src: 'meta.json.ejs', dest: `generated/${snakeCase}.meta.json` }
+        { src: 'meta.json.ejs', dest: `generator/${snakeCase}.meta.json` }
       ];
 
       for (const tmp of temps) {

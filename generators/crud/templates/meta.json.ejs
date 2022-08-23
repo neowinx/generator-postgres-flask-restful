@@ -14,6 +14,14 @@
     "<%= col.columnNameSnakeCase %>"<% if (index !== pkColumns.length - 1) {%>,<%_}%>
   <%_ }) -%>
   ],
+  <%_ let requiredColumns = columns.filter(col => col.notNull) -%>
+  <%_ if (requiredColumns.length > 0) { -%>
+  "required": [
+    <%_ requiredColumns.forEach((col, index) => { -%>
+    "<%= col.columnNameSnakeCase %>"<% if (index !== requiredColumns.length - 1) {%>,<%_}%>
+    <%_ }) -%>
+  ],
+  <%_ } -%>
   <%_ let dateColumns = columns.filter(col => col.pythonType === 'date') -%>
   <%_ if (dateColumns.length > 0) { -%>
   "date_fields": [
