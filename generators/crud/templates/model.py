@@ -21,26 +21,20 @@ class <%=pascalCase%>Model(BaseModel):
 
     <%_ columns.forEach(col => { -%>
     <%_   var columnExpression = `${col.columnNameSnakeCase} = db.Column(db.${col.sqlAlchemyType}` -%>
-    <%_   if (pk.includes(col.columnName)) { 
+    <%_   if (col.fkInfo) { 
+            columnExpression = `${columnExpression}, db.ForeignKey(${col.fkInfo.originNamePascalCase}Model.${col.fkInfo.originColumnSnakeCase})`
+          }
+          if (pk.includes(col.columnName)) { 
             columnExpression = `${columnExpression}, primary_key=True`
           }
           if (col.notNull) { 
             columnExpression = `${columnExpression}, nullable=False`
-          }
-          if (col.fkInfo) { 
-            columnExpression = `${columnExpression}, db.ForeignKey(${col.fkInfo.originNamePascalCase}Model.${col.fkInfo.originColumnSnakeCase})`
           }-%>
     <%= `${columnExpression})` %>
     <%_ }) -%>
 
     <%_ fkCols.forEach(col => { -%>
-        <%_ let attrName -%>
-        <%_ if(col.fkInfo.hasSiblings) { -%>
-            <%_ attrName = `${col.fkInfo.dependentColumnSnakeCase}_${col.fkInfo.originNameSnakeCase}` -%>
-        <%_ } else { -%>
-            <%_ attrName = col.fkInfo.originNameSnakeCase -%>
-        <%_ } -%>
-    <%= attrName %> = db.relationship('<%= col.fkInfo.originNamePascalCase %>Model', foreign_keys=[<%= col.fkInfo.dependentColumnSnakeCase %>], uselist=False)
+    <%= col.fkInfo.attrName %> = db.relationship('<%= col.fkInfo.originNamePascalCase %>Model', foreign_keys=[<%= col.fkInfo.dependentColumnSnakeCase %>], uselist=False)
     <%_ }) -%>
 
     <%_ if(columns.length > 0) {
@@ -64,14 +58,8 @@ class <%=pascalCase%>Model(BaseModel):
 
         <% if(fkCols.length > 0) { %>if jsondepth > 0:<% } %>
         <%_ fkCols.forEach(col => { -%>
-            <%_ let attrName -%>
-            <%_ if(col.fkInfo.hasSiblings) { -%>
-                <%_ attrName = `${col.fkInfo.dependentColumnSnakeCase}_${col.fkInfo.originNameSnakeCase}` -%>
-            <%_ } else { -%>
-                <%_ attrName = col.fkInfo.originNameSnakeCase -%>
-            <%_ } -%>
-            if self.<%= attrName %>:
-                json['<%= attrName %>'] = self.<%= attrName %>.json(jsondepth - 1)
+            if self.<%= col.fkInfo.attrName %>:
+                json['<%= col.fkInfo.attrName %>'] = self.<%= col.fkInfo.attrName %>.json(jsondepth - 1)
         <%_ }) -%>
         return json
 

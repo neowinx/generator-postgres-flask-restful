@@ -18,7 +18,8 @@
   <%_ if (requiredColumns.length > 0) { -%>
   "required": [
     <%_ requiredColumns.forEach((col, index) => { -%>
-    "<%= col.columnNameSnakeCase %>"<% if (index !== requiredColumns.length - 1) {%>,<%_}%>
+      <%_ let realAttr = col.fkInfo?.attrName ? col.fkInfo.attrName : col.columnNameSnakeCase -%>
+    "<%= realAttr %>"<% if (index !== requiredColumns.length - 1) {%>,<%_}%>
     <%_ }) -%>
   ],
   <%_ } -%>
@@ -35,13 +36,7 @@
   <%_ if (fkCols.length > 0) { -%>,
   "relations": { 
     <%_ fkCols.forEach((col, index) => { -%>
-      <%_ let attrName -%>
-      <%_ if(col.fkInfo.hasSiblings) { -%>
-          <%_ attrName = `${col.fkInfo.dependentColumnSnakeCase}_${col.fkInfo.originNameSnakeCase}` -%>
-      <%_ } else { -%>
-          <%_ attrName = col.fkInfo.originNameSnakeCase -%>
-      <%_ } -%>
-    "<%= attrName %>": {
+    "<%= col.fkInfo.attrName %>": {
       "dependent_attr": "<%= col.fkInfo.dependentColumnSnakeCase %>",
       "origin_attr": "<%= col.fkInfo.originColumnSnakeCase %>",
       "origin_model": "<%= col.fkInfo.originNameSnakeCase %>",

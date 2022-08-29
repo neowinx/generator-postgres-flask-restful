@@ -294,6 +294,12 @@ module.exports = class extends Generator {
           );
           ci.fkInfo.hasSiblings =
             table.fks.filter(fk => fk.origin_name === ci.fkInfo.originName).length > 1;
+
+          if (ci.fkInfo.hasSiblings) {
+            ci.fkInfo.attrName = `${ci.fkInfo.dependentColumnSnakeCase}_${ci.fkInfo.originNameSnakeCase}`;
+          } else {
+            ci.fkInfo.attrName = ci.fkInfo.originNameSnakeCase;
+          }
         }
       }
 
