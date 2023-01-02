@@ -9,7 +9,7 @@
         "console": "integratedTerminal",
         "program": "~/APPS/DESARROLLO/NODE/node-v12.19.0-linux-x64/bin/yo",
         "args": "postgres-flask-restful",
-        "cwd": "~/PROJECTS/AVALON/REINGENIERIA/avalon-backend"
+        "cwd": "~/PROJECTS/CODELAB/CCAN/arasy-backend"
       }
     },
     "crud": {
@@ -21,7 +21,7 @@
         "console": "integratedTerminal",
         "program": "~/APPS/DESARROLLO/NODE/node-v12.19.0-linux-x64/bin/yo",
         "args": "postgres-flask-restful:crud",
-        "cwd": "~/PROJECTS/AVALON/REINGENIERIA/avalon-backend"
+        "cwd": "~/PROJECTS/CODELAB/CCAN/arasy-backend"
       }
     }
   }

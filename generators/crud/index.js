@@ -337,7 +337,7 @@ module.exports = class extends Generator {
       if (this.fs.exists(this.destinationPath('app.py'))) {
         var appPy = this.fs.read(this.destinationPath('app.py'));
 
-        if (!appPy.indexOf(`api.add_resource(${pascalCase}List,`)) {
+        if (appPy.indexOf(`api.add_resource(${pascalCase}List,`) === -1) {
           let appendResourceApp = this.fs.read(
             this.templatePath('append_resource_app.py')
           );
