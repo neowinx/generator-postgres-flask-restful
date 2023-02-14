@@ -368,7 +368,7 @@ module.exports = class extends Generator {
           if (
             appPy
               .substring(appPy.indexOf('permisions = ['))
-              .indexOf(`${snakeCase}_search`) === -1
+              .indexOf(`'${snakeCase}_search'`) === -1
           ) {
             appPy = insertAfter(appPy, `permisions = [${os.EOL}`, `${permisionsAppPy}`);
           }
